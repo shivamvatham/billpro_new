@@ -1,10 +1,14 @@
-import { useState } from "react"
+// import { useState } from "react"
 import CondionalRender from "./components/Conditional"
 import CounterIncrese, { CounterDecrease } from "./components/Counter"
 import PropsCheck from "./components/PropsCheck"
 import PropsAsSlot from "./components/PropsAsSlot"
 import ControlledComponent from "./components/ControlledComponent"
 import HandleCheckboxes from "./components/HandleCheckboxes"
+import { HandleRadioAndSelect } from "./components/HandleRadioAndSelect"
+import { BasicLooping } from "./components/BasicLooping"
+import { LoopWithComponent } from "./components/LoopWithComponent"
+import { ClockParent } from "./components/ClockParent"
 
 function App() {
   // const [change, setChange] = useState(false)
@@ -30,14 +34,18 @@ function App() {
       {/* <CondionalRender />
      <CounterIncrese />
      <CounterDecrease /> */}
-     {/* <PropsAsSlot>
+      {/* <PropsAsSlot>
       <h1>shivam</h1>
      </PropsAsSlot>
      <PropsAsSlot color="blue">
       <h1>meetu</h1>
      </PropsAsSlot> */}
-     {/* <ControlledComponent /> */}
-     <HandleCheckboxes />
+      {/* <ControlledComponent /> */}
+      {/* <HandleCheckboxes /> */}
+      {/* <HandleRadioAndSelect /> */}
+      {/* <BasicLooping /> */}
+      {/* <LoopWithComponent /> */}
+      <ClockParent />
     </>
   )
 }
