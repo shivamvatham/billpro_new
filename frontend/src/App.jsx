@@ -9,6 +9,7 @@ import { HandleRadioAndSelect } from "./components/HandleRadioAndSelect"
 import { BasicLooping } from "./components/BasicLooping"
 import { LoopWithComponent } from "./components/LoopWithComponent"
 import { ClockParent } from "./components/ClockParent"
+import { NestedLooping } from "./components/NestedLooping"
 
 function App() {
   // const [change, setChange] = useState(false)
@@ -45,7 +46,8 @@ function App() {
       {/* <HandleRadioAndSelect /> */}
       {/* <BasicLooping /> */}
       {/* <LoopWithComponent /> */}
-      <ClockParent />
+      {/* <ClockParent /> */}
+      <NestedLooping />
     </>
   )
 }
