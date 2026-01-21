@@ -10,6 +10,7 @@ import { BasicLooping } from "./components/BasicLooping"
 import { LoopWithComponent } from "./components/LoopWithComponent"
 import { ClockParent } from "./components/ClockParent"
 import { NestedLooping } from "./components/NestedLooping"
+import { UseEffectUsage } from "./components/UseEffectUsage"
 
 function App() {
   // const [change, setChange] = useState(false)
@@ -47,7 +48,8 @@ function App() {
       {/* <BasicLooping /> */}
       {/* <LoopWithComponent /> */}
       {/* <ClockParent /> */}
-      <NestedLooping />
+      {/* <NestedLooping /> */}
+      <UseEffectUsage />
     </>
   )
 }
