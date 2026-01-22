@@ -13,6 +13,7 @@ import { NestedLooping } from "./components/NestedLooping"
 import { UseEffectUsage } from "./components/UseEffectUsage"
 import { StylesCheck } from "./components/StylesCheck"
 import { UseRefSample } from "./components/UseRefSample"
+import { UncontrolledComponent } from "./components/UncontrolledComponent"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -55,7 +56,8 @@ function App() {
       {/* <UseEffectUsage /> */}
       {/* <StylesCheck /> */}
       {/* <h1 className={styles.test}>check</h1> */}
-      <UseRefSample />
+      {/* <UseRefSample /> */}
+      <UncontrolledComponent />
     </>
   )
 }
