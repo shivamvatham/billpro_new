@@ -11,6 +11,9 @@ import { LoopWithComponent } from "./components/LoopWithComponent"
 import { ClockParent } from "./components/ClockParent"
 import { NestedLooping } from "./components/NestedLooping"
 import { UseEffectUsage } from "./components/UseEffectUsage"
+import { StylesCheck } from "./components/StylesCheck"
+import { UseRefSample } from "./components/UseRefSample"
+// import styles from './css/StyleCheck.module.css'
 
 function App() {
   // const [change, setChange] = useState(false)
@@ -49,7 +52,10 @@ function App() {
       {/* <LoopWithComponent /> */}
       {/* <ClockParent /> */}
       {/* <NestedLooping /> */}
-      <UseEffectUsage />
+      {/* <UseEffectUsage /> */}
+      {/* <StylesCheck /> */}
+      {/* <h1 className={styles.test}>check</h1> */}
+      <UseRefSample />
     </>
   )
 }
