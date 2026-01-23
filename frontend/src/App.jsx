@@ -14,6 +14,8 @@ import { UseEffectUsage } from "./components/UseEffectUsage"
 import { StylesCheck } from "./components/StylesCheck"
 import { UseRefSample } from "./components/UseRefSample"
 import { UncontrolledComponent } from "./components/UncontrolledComponent"
+import { CallParentFunctionFromChild } from "./components/CallParentFunctionFromChild"
+import { ForwardRefParent } from "./components/ForwardRefParent"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -57,7 +59,9 @@ function App() {
       {/* <StylesCheck /> */}
       {/* <h1 className={styles.test}>check</h1> */}
       {/* <UseRefSample /> */}
-      <UncontrolledComponent />
+      {/* <UncontrolledComponent /> */}
+      {/* <CallParentFunctionFromChild /> */}
+      <ForwardRefParent />
     </>
   )
 }
