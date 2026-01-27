@@ -17,6 +17,12 @@ import { UncontrolledComponent } from "./components/UncontrolledComponent"
 import { CallParentFunctionFromChild } from "./components/CallParentFunctionFromChild"
 import { ForwardRefParent } from "./components/ForwardRefParent"
 import {  UseFormStatus } from "./components/UseFormStatus"
+import { UseTransition } from "./components/UseTransition"
+import { DerrivedState } from "./components/DerrivedState"
+import { LiftState } from "./components/LiftingState"
+import { UpdateObj } from "./components/UpdateObj"
+import { UpdateArray } from "./components/UpdateArray"
+import UseActionState from "./components/UseActionState"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -63,8 +69,14 @@ function App() {
       {/* <UncontrolledComponent /> */}
       {/* <CallParentFunctionFromChild /> */}
       {/* <ForwardRefParent /> */}
-      <UseFormStatus />
+      {/* <UseFormStatus /> */}
       {/* <CheckAnotherFunc /> */}
+      {/* <UseTransition /> */}
+      {/* <DerrivedState /> */}
+      {/* <LiftState /> */}
+      {/* <UpdateObj /> */}
+      {/* <UpdateArray /> */}
+      <UseActionState />
     </>
   )
 }
