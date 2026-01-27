@@ -1,7 +1,8 @@
-function PropsAsSlot({ children, color = 'green' }) {
+function PropsAsSlot(props) {
+    console.log(props)
     return (
-        <div style={{color: color, backgroundColor: 'pink'}}>
-            {children}
+        <div style={{color: props.color, backgroundColor: 'pink'}}>
+            {props.children}
         </div>
     )
 }

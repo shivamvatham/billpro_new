@@ -16,6 +16,7 @@ import { UseRefSample } from "./components/UseRefSample"
 import { UncontrolledComponent } from "./components/UncontrolledComponent"
 import { CallParentFunctionFromChild } from "./components/CallParentFunctionFromChild"
 import { ForwardRefParent } from "./components/ForwardRefParent"
+import {  UseFormStatus } from "./components/UseFormStatus"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -61,7 +62,9 @@ function App() {
       {/* <UseRefSample /> */}
       {/* <UncontrolledComponent /> */}
       {/* <CallParentFunctionFromChild /> */}
-      <ForwardRefParent />
+      {/* <ForwardRefParent /> */}
+      <UseFormStatus />
+      {/* <CheckAnotherFunc /> */}
     </>
   )
 }
