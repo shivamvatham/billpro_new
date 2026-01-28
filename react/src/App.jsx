@@ -16,7 +16,7 @@ import { UseRefSample } from "./components/UseRefSample"
 import { UncontrolledComponent } from "./components/UncontrolledComponent"
 import { CallParentFunctionFromChild } from "./components/CallParentFunctionFromChild"
 import { ForwardRefParent } from "./components/ForwardRefParent"
-import {  UseFormStatus } from "./components/UseFormStatus"
+import { UseFormStatus } from "./components/UseFormStatus"
 import { UseTransition } from "./components/UseTransition"
 import { DerrivedState } from "./components/DerrivedState"
 import { LiftState } from "./components/LiftingState"
@@ -26,6 +26,8 @@ import UseActionState from "./components/UseActionState"
 import { UseId } from "./components/UseId"
 import { CustomHook } from "./components/CustomHook"
 import { UseContext } from "./components/UseContext"
+import { Drawer } from "./layout/Drawer"
+import AppRouter from "./routes/AppRouter"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -46,7 +48,7 @@ function App() {
   //   mobile: 9924352145
   // }
   return (
-    <>
+    <div style={{ display: 'flex' }}>
       {/* <button onClick={() => setChange(!change)}>change prop data</button>
       <PropsCheck data={change ? userDetails : userDetails2} /> */}
       {/* <CondionalRender />
@@ -82,8 +84,12 @@ function App() {
       {/* <UseActionState /> */}
       {/* <UseId /> */}
       {/* <CustomHook /> */}
-      <UseContext />
-    </>
+      {/* <UseContext /> */}
+      <Drawer />
+      <div style={{ marginLeft: '230px', flex: 1, padding: '20px' }}>
+        <AppRouter />
+      </div>
+    </div>
   )
 }
 
