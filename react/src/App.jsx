@@ -23,6 +23,9 @@ import { LiftState } from "./components/LiftingState"
 import { UpdateObj } from "./components/UpdateObj"
 import { UpdateArray } from "./components/UpdateArray"
 import UseActionState from "./components/UseActionState"
+import { UseId } from "./components/UseId"
+import { CustomHook } from "./components/CustomHook"
+import { UseContext } from "./components/UseContext"
 // import styles from './css/StyleCheck.module.css'
 
 function App() {
@@ -76,7 +79,10 @@ function App() {
       {/* <LiftState /> */}
       {/* <UpdateObj /> */}
       {/* <UpdateArray /> */}
-      <UseActionState />
+      {/* <UseActionState /> */}
+      {/* <UseId /> */}
+      {/* <CustomHook /> */}
+      <UseContext />
     </>
   )
 }
