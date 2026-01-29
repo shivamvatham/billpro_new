@@ -1,11 +1,13 @@
 import { Drawer } from "./layout/Drawer"
 import AppRouter from "./routes/AppRouter"
+import AppBar from "./components/AppBar"
 
 function App() {
   return (
     <div style={{ display: 'flex' }}>
       <Drawer />
-      <div style={{ marginLeft: '230px', flex: 1, padding: '10px' }}>
+      <AppBar />
+      <div style={{ marginLeft: '230px', marginTop: '60px', flex: 1, padding: '20px' }}>
         <AppRouter />
       </div>
     </div>

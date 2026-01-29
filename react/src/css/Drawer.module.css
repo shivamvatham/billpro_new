@@ -15,8 +15,11 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    border-right: 1px solid #636466;
+    box-shadow: 2px 2px 6px 2px #e5e7eb;
 }
 .navContent {
+    padding: 3px;
     margin-top: 0px;
     overflow-y: auto;
     height: calc(100vh - 100px);
@@ -37,9 +40,20 @@
     background-color: #fbfcff;
     padding: 10px;
     list-style: none;
-    box-shadow: 2px 2px 6px 2px #e5e7eb;
+    /* box-shadow: 2px 2px 6px 2px #e5e7eb; */
     font-size: 20px;
     text-decoration: none;
+}
+.activeLink{
+    display: block;
+    background-color: #6189f8;
+    padding: 10px;
+    list-style: none;
+    /* box-shadow: 2px 2px 6px 2px #e5e7eb; */
+    font-size: 20px;
+    color: whitesmoke;
+    text-decoration: none;
+    border-radius: 20px;
 }
 .link:hover{
     background-color: #f0f2f7;

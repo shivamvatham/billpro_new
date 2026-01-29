@@ -26,10 +26,15 @@ const UseActionState = lazy(() => import('../components/UseActionState'))
 const UseId = lazy(() => import('../components/UseId'))
 const CustomHook = lazy(() => import('../components/CustomHook'))
 const UseContext = lazy(() => import('../components/UseContext'))
+const NestedRoute = lazy(() => import('../components/NestedRoute'))
 
 export const routes = [
   { path: '/', element: Conditional, title: 'Conditional Rendering' },
-  { path: '/counter', element: Counter, title: 'Counter' },
+  {
+    path: '/counter', element: Counter, title: 'Counter', nested: [
+      { path: 'nested', element: NestedRoute, title: 'Nested' }
+    ]
+  },
   { path: '/props-check', element: PropsCheck, title: 'Props Check' },
   { path: '/controlled-component', element: ControlledComponent, title: 'Controlled Component' },
   { path: '/handle-checkboxes', element: HandleCheckboxes, title: 'Handle Checkboxes' },
