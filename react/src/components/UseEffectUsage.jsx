@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { UseEffectUsageChild } from "./common/UseEffectUsageChild"
 
-export const UseEffectUsage = () => {
+const UseEffectUsage = () => {
     const [count, setCount] = useState(0)
     const [multi, setMulti] = useState(1)
     const [toggle, setToggle] = useState(true)
@@ -42,3 +42,5 @@ export const UseEffectUsage = () => {
         </>
     )
 }
+
+export default UseEffectUsage

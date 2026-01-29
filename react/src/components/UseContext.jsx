@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SubjectData } from "../contexts/SubjectContext";
 import { UseContextChild } from "./common/UseContextChild";
 
-export function UseContext() {
+function UseContext() {
     const [subject, setSubject] = useState('Math')
     return (
         <div style={{ backgroundColor: 'peachpuff', padding: '10px' }}>
@@ -20,3 +20,5 @@ export function UseContext() {
         </div>
     )
 }
+
+export default UseContext

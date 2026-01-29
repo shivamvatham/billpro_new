@@ -1,6 +1,6 @@
 import { useRef } from "react"
 
-export const UncontrolledComponent = () => {
+const UncontrolledComponent = () => {
     const username = useRef()
     const password = useRef()
     const handleForm = (event) => {
@@ -32,3 +32,5 @@ export const UncontrolledComponent = () => {
         </div>
     )
 }
+
+export default UncontrolledComponent

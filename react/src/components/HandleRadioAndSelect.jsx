@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export function HandleRadioAndSelect(){
+function HandleRadioAndSelect(){
     const [gender, setGender] = useState('male')
     const [state, setState] = useState('delhi')
     return(
@@ -32,3 +32,5 @@ export function HandleRadioAndSelect(){
         </>
     )
 }
+
+export default HandleRadioAndSelect

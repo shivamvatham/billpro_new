@@ -1,5 +1,6 @@
 import { useFormStatus } from 'react-dom'
-export function UseFormStatus() {
+
+function UseFormStatus() {
     const handleSubmit = async () => {
         await new Promise(res => {
             setTimeout(() => {
@@ -38,6 +39,8 @@ function CustomerForm() {
         </div>
     )
 }
+
+export default UseFormStatus
 
 // this will not work because form action happining in same component so rect not track this tree
 

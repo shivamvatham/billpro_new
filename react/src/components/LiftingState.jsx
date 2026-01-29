@@ -2,7 +2,7 @@ import { useState } from "react";
 import { LiftState1 } from "./common/LiftState1";
 import { LiftState2 } from "./common/LiftState2";
 
-export function LiftState() {
+function LiftState() {
     const [name, setName] = useState('')
     return (
         <div>
@@ -13,5 +13,7 @@ export function LiftState() {
         </div>
     )
 }
+
+export default LiftState
 
 // lifting state is nothing when data is lift one child to parent and used in another child is lifting state

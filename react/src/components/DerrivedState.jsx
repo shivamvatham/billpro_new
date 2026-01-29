@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 // derrive state when any variable is dependent on any state value
-export function DerrivedState() {
+function DerrivedState() {
     const [users, setUsers] = useState([])
     const [user, setUser] = useState('')
 
@@ -41,3 +41,5 @@ export function DerrivedState() {
         </div>
     )
 }
+
+export default DerrivedState

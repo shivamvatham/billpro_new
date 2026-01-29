@@ -1,6 +1,6 @@
 import { LoopComponent } from "./common/LoopComponent";
 
-export function LoopWithComponent() {
+function LoopWithComponent() {
     const tableData = [
         {
             name: 'shivam',
@@ -26,3 +26,5 @@ export function LoopWithComponent() {
         </>
     )
 }
+
+export default LoopWithComponent

@@ -1,6 +1,6 @@
 import { NestedLoopingChild } from "./common/NestedLoopingChild";
 
-export function NestedLooping() {
+function NestedLooping() {
     const colleges = [
         {
             collegeId: 1,
@@ -56,3 +56,5 @@ export function NestedLooping() {
         </>
     )
 }
+
+export default NestedLooping

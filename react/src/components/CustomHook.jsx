@@ -1,6 +1,6 @@
 import { useToggle } from "../customHook/useToggle"
 
-export const CustomHook = () => {
+const CustomHook = () => {
     const [toggle, setToggle] = useToggle()
     return (
         <>
@@ -14,3 +14,5 @@ export const CustomHook = () => {
         </>
     )
 }
+
+export default CustomHook

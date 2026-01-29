@@ -1,6 +1,6 @@
 import { ChildFunctionComponent } from "./common/ChildFunctionComponent";
 
-export function CallParentFunctionFromChild() {
+function CallParentFunctionFromChild() {
     const showAlert = (message) => {
         console.log('parent function called',message)
     }
@@ -11,3 +11,5 @@ export function CallParentFunctionFromChild() {
         </div>
     )
 }
+
+export default CallParentFunctionFromChild

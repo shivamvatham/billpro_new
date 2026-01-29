@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export const UpdateObj = () => {
+const UpdateObj = () => {
     const [obj, setObj] = useState({
         name: 'shivam',
         address: {
@@ -36,3 +36,5 @@ export const UpdateObj = () => {
         </div>
     )
 }
+
+export default UpdateObj

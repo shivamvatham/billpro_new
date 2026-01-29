@@ -2,7 +2,7 @@ import { useState } from "react"
 import '../css/StyleCheck.css'
 import styles from '../css/StyleCheck.module.css'
 
-export function StylesCheck() {
+function StylesCheck() {
     const [style, setStyle] = useState('red')
 
     const cardStyle = {
@@ -60,3 +60,5 @@ export function StylesCheck() {
         </div>
     )
 }
+
+export default StylesCheck

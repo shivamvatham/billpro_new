@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ClockChild } from "./common/ClockChild";
 
-export function ClockParent() {
+function ClockParent() {
     const [color, setColor] = useState('red')
     const colors = ['red', 'yellow', 'green', 'brown', 'blue'];
     return (
@@ -17,3 +17,5 @@ export function ClockParent() {
         </>
     )
 }
+
+export default ClockParent

@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export function UpdateArray() {
+function UpdateArray() {
     const [arr, setArr] = useState([
         {
             city: 'ahmedabad',
@@ -31,3 +31,5 @@ export function UpdateArray() {
         </div>
     )
 }
+
+export default UpdateArray

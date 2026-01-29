@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 
-export const UseRefSample = () => {
+const UseRefSample = () => {
     const inputControl = useRef(null)
     const [input, setInput] = useState(0)
 
@@ -23,3 +23,5 @@ export const UseRefSample = () => {
         </>
     )
 }
+
+export default UseRefSample

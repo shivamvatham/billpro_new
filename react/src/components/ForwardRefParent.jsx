@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import ForwardRefChild from "./common/ForwardRefChild";
 
-export function ForwardRefParent() {
+function ForwardRefParent() {
     const inputRef = useRef(null)
     const functionRef = useRef(null)
     const refHandle = () => {
@@ -22,4 +22,6 @@ export function ForwardRefParent() {
         </div>
     )
 }
+
+export default ForwardRefParent
 

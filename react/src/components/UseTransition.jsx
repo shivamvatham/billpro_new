@@ -1,7 +1,7 @@
 import { useRef, useTransition } from 'react'
 import loader from '../css/LoadingButton.module.css'
 
-export const UseTransition = () => {
+const UseTransition = () => {
     const [pending, setTrasition] = useTransition()
     const data = useRef('')
     const submit = () =>{
@@ -20,3 +20,5 @@ export const UseTransition = () => {
         </div>
     )
 }
+
+export default UseTransition

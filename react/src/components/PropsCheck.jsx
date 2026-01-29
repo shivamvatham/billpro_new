@@ -1,13 +1,16 @@
-export default function PropsCheck({ data }) {
+import PropsAsSlot from "./PropsAsSlot";
+
+function PropsCheck() {
     return (
         <>
-            <ul>
-                <li>name: {data.name}</li>
-                <li>age: {data.age}</li>
-                <li>email: {data.email}</li>
-                <li>mobile: {data.mobile}</li>
-                <li>employee Id: {data.empId}</li>
-            </ul>
+            <PropsAsSlot>
+                <h1>shivam</h1>
+            </PropsAsSlot>
+            <PropsAsSlot color="blue">
+                <h1>meetu</h1>
+            </PropsAsSlot>
         </>
     )
 }
+
+export default PropsCheck

@@ -1,4 +1,4 @@
-export function BasicLooping() {
+function BasicLooping() {
     const tableData = [
         {
             name: 'shivam',
@@ -39,3 +39,5 @@ export function BasicLooping() {
         </>
     )
 }
+
+export default BasicLooping

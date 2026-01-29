@@ -15,16 +15,3 @@ function CounterIncrese() {
 }
 
 export default CounterIncrese;
-
-export function CounterDecrease() {
-    const [count, setCount] = useState(10)
-
-    return (
-        <>
-            <h1>
-                {count}
-            </h1>
-            <button onClick={() => setCount(count - 1)}>Decrease</button>
-        </>
-    )
-}

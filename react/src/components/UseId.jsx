@@ -1,6 +1,6 @@
 import { useId } from "react"
 
-export const UseId = () => {
+const UseId = () => {
     return (
         <>
             <h2>UseId Sample</h2>
@@ -24,3 +24,5 @@ function UserForm() {
         </>
     )
 }
+
+export default UseId
