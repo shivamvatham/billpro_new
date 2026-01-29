@@ -1,5 +1,4 @@
 import { lazy } from 'react'
-
 const Conditional = lazy(() => import('../components/Conditional'))
 const Counter = lazy(() => import('../components/Counter'))
 const PropsCheck = lazy(() => import('../components/PropsCheck'))
@@ -26,15 +25,16 @@ const UseActionState = lazy(() => import('../components/UseActionState'))
 const UseId = lazy(() => import('../components/UseId'))
 const CustomHook = lazy(() => import('../components/CustomHook'))
 const UseContext = lazy(() => import('../components/UseContext'))
-const NestedRoute = lazy(() => import('../components/NestedRoute'))
+const NestedSample = lazy(() => import('../components/NestedSample'))
+const Management = lazy(() => import('../components/Management'))
+const NestedSample2 = lazy(() => import('../components/NestedSample2'))
+const Users = lazy(() => import('../components/Users'))
+const EditUsers = lazy(() => import('../components/EditUser'))
+const NotFound = lazy(() => import('../components/NotFound'))
 
 export const routes = [
   { path: '/', element: Conditional, title: 'Conditional Rendering' },
-  {
-    path: '/counter', element: Counter, title: 'Counter', nested: [
-      { path: 'nested', element: NestedRoute, title: 'Nested' }
-    ]
-  },
+  { path: '/counter', element: Counter, title: 'Counter' },
   { path: '/props-check', element: PropsCheck, title: 'Props Check' },
   { path: '/controlled-component', element: ControlledComponent, title: 'Controlled Component' },
   { path: '/handle-checkboxes', element: HandleCheckboxes, title: 'Handle Checkboxes' },
@@ -59,4 +59,30 @@ export const routes = [
   { path: '/use-id', element: UseId, title: 'Use ID' },
   { path: '/custom-hook', element: CustomHook, title: 'Custom Hook' },
   { path: '/use-context', element: UseContext, title: 'Use Context' },
+  // nested route with layout wrapper
+  {
+    path: '/management',
+    element: Management,
+    title: 'Management',
+    children: [
+      { path: 'nested-sample', element: NestedSample, title: 'Nested Sample' }
+    ]
+  },
+  // nested route without parent outlet
+  {
+    path: 'product',
+    title: 'Product',
+    children: [
+      { path: 'nested-sample2', element: NestedSample2, title: 'Nested Sample 2' },
+    ]
+  },
+  { path: '/user', element: Users, title: 'Users List' },
+  // dynammic route
+  // { path: '/edituser/:id', element: EditUsers, title: 'Edit User' , hidden: true},
+
+  // optional segment route
+  { path: '/edituser/:id?', element: EditUsers, title: 'Edit User' , hidden: true},
+
+  { path: '/*', element: NotFound, title: 'Edit User' , hidden: true},
+
 ]

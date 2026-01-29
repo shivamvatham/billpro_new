@@ -58,3 +58,49 @@
 .link:hover{
     background-color: #f0f2f7;
 }
+
+.dropdownToggle {
+    display: block;
+    width: 100%;
+    background-color: #fbfcff;
+    padding: 10px;
+    border: none;
+    font-size: 20px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdownToggle:hover {
+    background-color: #f0f2f7;
+}
+
+.childLink {
+    display: block;
+    background-color: #f8f9fa;
+    padding: 8px 20px;
+    margin-left: 15px;
+    font-size: 16px;
+    text-decoration: none;
+    color: #495057;
+    border-left: 3px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.activeChildLink {
+    display: block;
+    background-color: #e3f2fd;
+    padding: 8px 20px;
+    margin-left: 15px;
+    font-size: 16px;
+    text-decoration: none;
+    color: #1976d2;
+    border-left: 3px solid #6189f8;
+    border-radius: 0 15px 15px 0;
+    font-weight: 500;
+}
+
+.childLink:hover {
+    background-color: #e9ecef;
+    border-left-color: #6c757d;
+}

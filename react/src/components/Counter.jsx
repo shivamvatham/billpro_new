@@ -12,8 +12,6 @@ function CounterIncrese() {
                 <button onClick={() => setCount(count + 1)}>increse</button>
             </div>
             <h1>hello</h1>
-            <NavLink to="nested">Nested</NavLink>
-            <Outlet></Outlet>
         </>
     )
 }
