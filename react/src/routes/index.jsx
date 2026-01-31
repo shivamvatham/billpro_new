@@ -30,6 +30,9 @@ const Management = lazy(() => import('../components/Management'))
 const NestedSample2 = lazy(() => import('../components/NestedSample2'))
 const Users = lazy(() => import('../components/Users'))
 const EditUsers = lazy(() => import('../components/EditUser'))
+const UseReducer = lazy(() => import('../components/UseReducer'))
+const UseApi = lazy(() => import('../components/UseApi'))
+
 const NotFound = lazy(() => import('../components/NotFound'))
 
 export const routes = [
@@ -59,6 +62,8 @@ export const routes = [
   { path: '/use-id', element: UseId, title: 'Use ID' },
   { path: '/custom-hook', element: CustomHook, title: 'Custom Hook' },
   { path: '/use-context', element: UseContext, title: 'Use Context' },
+  { path: '/use-reducer', element: UseReducer, title: 'Use Reducer' },
+  { path: '/use-api', element: UseApi, title: 'Use Api' },
   // nested route with layout wrapper
   {
     path: '/management',
