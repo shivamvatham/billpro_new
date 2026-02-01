@@ -32,6 +32,7 @@ const Users = lazy(() => import('../components/Users'))
 const EditUsers = lazy(() => import('../components/EditUser'))
 const UseReducer = lazy(() => import('../components/UseReducer'))
 const UseApi = lazy(() => import('../components/UseApi'))
+const RTK = lazy(() => import('../components/RTK'))
 
 const NotFound = lazy(() => import('../components/NotFound'))
 
@@ -64,6 +65,7 @@ export const routes = [
   { path: '/use-context', element: UseContext, title: 'Use Context' },
   { path: '/use-reducer', element: UseReducer, title: 'Use Reducer' },
   { path: '/use-api', element: UseApi, title: 'Use Api' },
+  { path: '/rtk', element: RTK, title: 'RTK' },
   // nested route with layout wrapper
   {
     path: '/management',

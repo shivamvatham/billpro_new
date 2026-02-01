@@ -1,6 +1,8 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 const AppBar = () => {
+  const name = useSelector((state)=> state.navBar.titleName )
   return (
     <div style={{
       height: '60px',
@@ -25,9 +27,10 @@ const AppBar = () => {
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <div style={{
-          width: '32px',
+          width: 'auto',
           height: '32px',
-          borderRadius: '50%',
+          borderRadius: '5px',
+          padding: '5px',
           backgroundColor: '#fff',
           color: '#1976d2',
           display: 'flex',
@@ -36,7 +39,7 @@ const AppBar = () => {
           fontWeight: 'bold',
           cursor: 'pointer'
         }}>
-          U
+          {name}
         </div>
       </div>
     </div>
