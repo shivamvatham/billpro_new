@@ -1,0 +1,58 @@
+import ProtectedLayout from "@/layouts/ProtectedLayout";
+import PublicLayout from "@/layouts/PublicLayout";
+import { Routes, Route } from "react-router";
+import PublicRoutes from "./PublicRoutes";
+import ProtectedRoutes from "./ProtectedRoutes";
+import {
+  protectedRoute,
+  publicRoute,
+  type AppRoute,
+} from "@/app/routes/config";
+import { Suspense } from "react";
+
+const renderRoutes = (routes: AppRoute[]) => {
+  return routes.map((route) => {
+    if (route.children) {
+      return (
+        <Route key={route.path} path={route.path} element={<route.element />}>
+          {renderRoutes(route.children)}
+        </Route>
+      );
+    }
+
+    return (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          <Suspense fallback={<h1>loading</h1>}>
+            <route.element />
+          </Suspense>
+        }
+      />
+    );
+  });
+};
+
+export default function AppRouter() {
+  return (
+    <Routes>
+      {/* public routes */}
+      <Route element={<PublicRoutes />}>
+        <Route element={<PublicLayout />}>
+          {renderRoutes(publicRoute as AppRoute[])}
+        </Route>
+      </Route>
+
+      {/* protected routes */}
+      <Route element={<ProtectedRoutes />}>
+        <Route element={<ProtectedLayout />}>
+          {renderRoutes(protectedRoute as AppRoute[])}
+        </Route>
+      </Route>
+
+      {/* ---------- FALLBACK ---------- */}
+      <Route path="*" element={<h2>no route found</h2>} />
+    </Routes>
+  );
+}
