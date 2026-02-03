@@ -12,9 +12,11 @@ import { Suspense } from "react";
 
 const renderRoutes = (routes: AppRoute[]) => {
   return routes.map((route) => {
+    const Component = route.element;
+    
     if (route.children) {
       return (
-        <Route key={route.path} path={route.path} element={<route.element />}>
+        <Route key={route.path} path={route.path} element={Component ? <Component /> : null}>
           {renderRoutes(route.children)}
         </Route>
       );
@@ -25,9 +27,11 @@ const renderRoutes = (routes: AppRoute[]) => {
         key={route.path}
         path={route.path}
         element={
-          <Suspense fallback={<h1>loading</h1>}>
-            <route.element />
-          </Suspense>
+          Component ? (
+            <Suspense fallback={<h1>loading</h1>}>
+              <Component />
+            </Suspense>
+          ) : null
         }
       />
     );
