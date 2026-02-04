@@ -25,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { NavLink } from "react-router"
 
 export function SideBarFooter({
   user,
@@ -89,7 +90,7 @@ export function SideBarFooter({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut />
-              Log out
+              <NavLink to="/login">Logout</NavLink>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

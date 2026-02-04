@@ -28,7 +28,7 @@ const renderRoutes = (routes: AppRoute[]) => {
         path={route.path}
         element={
           Component ? (
-            <Suspense fallback={<h1>loading</h1>}>
+            <Suspense fallback={null}>
               <Component />
             </Suspense>
           ) : null

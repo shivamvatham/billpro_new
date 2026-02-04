@@ -11,18 +11,19 @@ const createTestTenant = async () => {
 
     // Create new tenant
     const tenant = await Tenant.create({
-      name: 'tenant 2',
-      slug: 'tenant-2'
+      name: 'admin tenant',
+      slug: 'admin-tenant'
     });
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('tenant2', salt);
+    const hashedPassword = await bcrypt.hash('admin', salt);
 
     // Create admin for this tenant
     const user = await User.create({
-      name: 'tenant 2',
-      email: 'tenant@2.com',
+      name: 'admin',
+      username: 'admin',
+      email: 'admin@gmail.com',
       password: hashedPassword,
       role: 'admin',
       tenant: tenant._id

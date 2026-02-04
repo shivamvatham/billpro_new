@@ -13,16 +13,16 @@ const generateToken = (id, tenantId, role) => {
 };
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
-    return next(new ApiError(400, 'Please provide email and password'));
+  if (!username || !password) {
+    return next(new ApiError(400, 'Please provide username and password'));
   }
 
-  const user = await User.findOne({ email }).select('+password').populate('tenant');
+  const user = await User.findOne({ username }).select('+password').populate('tenant');
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    return next(new ApiError(401, 'Invalid email or password'));
+    return next(new ApiError(401, 'Invalid username or password'));
   }
 
   const token = generateToken(user._id, user.tenant._id, user.role);
