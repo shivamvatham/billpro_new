@@ -8,13 +8,14 @@ import { Eye, EyeOff } from "lucide-react"
 import React from "react"
 import axios from "@/util/request"
 import { useNavigate } from "react-router"
-import { useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
+import { setCredentials } from "@/features/auth/authSlice"
 
 export default function Login() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    // const isAuthenticated = useSelector()
+    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -22,7 +23,10 @@ export default function Login() {
         const data = { username, password }
         try {
             const response = await axios.post('/auth/login', data)
-            console.log('resp',response)
+            dispatch(setCredentials({
+                token: response.data.token,
+                user: response.data.data.user,
+            }))
             navigate('/')
             
         } catch (error) {

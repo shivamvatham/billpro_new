@@ -13,6 +13,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { useSelector } from "react-redux"
+import { getCredentialsSelect } from "@/features/auth/authSlice"
 
 // This is sample data.
 const data = {
@@ -27,6 +29,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const userData = useSelector(getCredentialsSelect)
+  console.log(userData.user)
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -36,7 +40,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SideBarMenu />
       </SidebarContent>
       <SidebarFooter>
-        <SideBarFooter user={data.user} />
+        <SideBarFooter user={{
+          name:userData.user.name || '',
+          email: userData.user.email || ''
+          }} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
