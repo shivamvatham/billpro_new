@@ -8,11 +8,13 @@ import { Eye, EyeOff } from "lucide-react"
 import React from "react"
 import axios from "@/util/request"
 import { useNavigate } from "react-router"
+import { useSelector } from "react-redux"
 
 export default function Login() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
+    // const isAuthenticated = useSelector()
     const navigate = useNavigate()
 
     const handleSubmit = async (event: React.FormEvent) => {
