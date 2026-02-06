@@ -1,6 +1,6 @@
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 import PublicLayout from "@/layouts/PublicLayout";
-import { Routes, Route } from "react-router";
+import { Routes, Route, Navigate } from "react-router";
 import PublicRoutes from "./PublicRoutes";
 import ProtectedRoutes from "./ProtectedRoutes";
 import {
@@ -51,6 +51,7 @@ export default function AppRouter() {
       {/* protected routes */}
       <Route element={<ProtectedRoutes />}>
         <Route element={<ProtectedLayout />}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {renderRoutes(protectedRoute as AppRoute[])}
         </Route>
       </Route>

@@ -28,7 +28,7 @@ export const protectedRoute: AppRoute[] = [
     title: "Dashboard",
     name: "dashboard",
     icon: "LayoutDashboard",
-    path: "/",
+    path: "/dashboard",
     element: lazy(() => import("@/pages/protected/dashboard/Dashboard")),
   },
   {

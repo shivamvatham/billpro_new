@@ -1,26 +1,36 @@
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Eye, EyeOff } from "lucide-react"
-import React from "react"
+import { useState } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import axios from "@/util/request"
 import { useNavigate } from "react-router"
 import { useDispatch } from "react-redux"
 import { setCredentials } from "@/features/auth/authSlice"
+import { Spinner } from "@/components/ui/spinner"
+
+const loginSchema = z.object({
+    username: z.string().min(1, "Username is required"),
+    password: z.string().min(1, "Password is required"),
+})
 
 export default function Login() {
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault()
-        const data = { username, password }
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+        mode: "onChange",
+        defaultValues: { username: "", password: "" },
+    })
+
+    const onSubmit = async (data: z.infer<typeof loginSchema>) => {
         try {
             const response = await axios.post('/auth/login', data)
             dispatch(setCredentials({
@@ -28,9 +38,8 @@ export default function Login() {
                 user: response.data.data.user,
             }))
             navigate('/')
-            
         } catch (error) {
-            console.log('error',error)
+            console.log('error', error)
         }
     }
 
@@ -39,37 +48,58 @@ export default function Login() {
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-                    <CardDescription>Sign in to your Bill Pro account</CardDescription>
+                    <CardDescription>Login to your account</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                                id="username"
-                                type="text"
-                                placeholder="Enter your username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <InputGroup>
-                                <InputGroupInput
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                <InputGroupAddon className="cursor-pointer" onClick={() => setShowPassword(!showPassword)} align="inline-end">{showPassword ? <Eye /> : <EyeOff />}</InputGroupAddon>
-                            </InputGroup>
-                        </div>
-                        <Button type="submit" className="w-full">
-                            Login
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                        <Controller
+                            name="username"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid} >
+                                    <FieldLabel htmlFor="username">Username</FieldLabel>
+                                    <Input
+                                        {...field}
+                                        id="username"
+                                        placeholder="Enter your username"
+                                        aria-invalid={fieldState.invalid}
+                                    />
+                                    <div className="min-h-4 -mt-2.5">
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </div>
+                                </Field>
+                            )}
+                        />
+                        <Controller
+                            name="password"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                                    <InputGroup>
+                                        <InputGroupInput
+                                            {...field}
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter your password"
+                                            aria-invalid={fieldState.invalid}
+                                        />
+                                        <InputGroupAddon
+                                            className="cursor-pointer"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            align="inline-end"
+                                        >
+                                            {showPassword ? <Eye /> : <EyeOff />}
+                                        </InputGroupAddon>
+                                    </InputGroup>
+                                    <div className="min-h-4 -mt-2.5">
+                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </div>
+                                </Field>
+                            )}
+                        />
+                        <Button type="submit" className="w-full mt-2" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? <Spinner data-icon="inline-start" /> : "Login"}
                         </Button>
                     </form>
                 </CardContent>
