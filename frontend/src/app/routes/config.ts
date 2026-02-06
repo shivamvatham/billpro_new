@@ -32,17 +32,31 @@ export const protectedRoute: AppRoute[] = [
     element: lazy(() => import("@/pages/protected/dashboard/Dashboard")),
   },
   {
-    title: "Sales",
-    icon: "LayoutDashboard",
-    name: "sales",
+    title: "Customers",
+    icon: "UsersRound",
+    name: "customers",
     children: [
       {
-        title: "Sales List",
+        title: "Customer List",
         icon: "LayoutDashboard",
-        hidden: false,
-        name: "sales.list",
-        path: "/login",
-        element: lazy(() => import("@/pages/protected/dashboard/Dashboard")),
+        name: "customer.list",
+        path: "/customer/list",
+        element: lazy(() => import("@/pages/protected/customers/CustomerList")),
+      },
+      {
+        title: "Add Customer",
+        icon: "UserRoundPlus",
+        name: "customer.addcustomer",
+        path: "/customer/add",
+        element: lazy(() => import("@/pages/protected/customers/AddCustomer")),
+      },
+      {
+        title: "Edit Customer",
+        icon: "UserRoundPen",
+        name: "customer.editcustomer",
+        hidden: true,
+        path: "/customer/edit/:id",
+        element: lazy(() => import("@/pages/protected/customers/EditCustomer")),
       }
     ]
   },

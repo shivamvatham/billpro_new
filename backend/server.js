@@ -13,7 +13,7 @@ const startServer = async () => {
     // Connect to MongoDB
     await connectDB();
 
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
       console.log(`🌐 Accessible on local network via http://10.10.20.34:${PORT}`);

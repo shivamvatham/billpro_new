@@ -55,20 +55,20 @@ export default function Login() {
                         <Controller
                             name="username"
                             control={form.control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid} >
-                                    <FieldLabel htmlFor="username">Username</FieldLabel>
-                                    <Input
-                                        {...field}
-                                        id="username"
-                                        placeholder="Enter your username"
-                                        aria-invalid={fieldState.invalid}
-                                    />
-                                    <div className="min-h-4 -mt-2.5">
-                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                    </div>
-                                </Field>
-                            )}
+                            render={({ field, fieldState }) => {
+                                return (
+                                    <Field data-invalid={fieldState.invalid} >
+                                        <FieldLabel htmlFor="username">Username</FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="username"
+                                            placeholder="Enter your username"
+                                            aria-invalid={fieldState.invalid}
+                                        />
+                                        <FieldError errors={[fieldState.error]} />
+                                    </Field>
+                                )
+                            }}
                         />
                         <Controller
                             name="password"
@@ -92,9 +92,7 @@ export default function Login() {
                                             {showPassword ? <Eye /> : <EyeOff />}
                                         </InputGroupAddon>
                                     </InputGroup>
-                                    <div className="min-h-4 -mt-2.5">
-                                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                                    </div>
+                                    <FieldError errors={[fieldState.error]} />
                                 </Field>
                             )}
                         />

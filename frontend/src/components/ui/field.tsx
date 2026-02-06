@@ -216,15 +216,15 @@ function FieldError({
     )
   }, [children, errors])
 
-  if (!content) {
-    return null
-  }
+  // if (!content) {
+  //   return null
+  // }
 
   return (
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-destructive text-xs font-normal", className)}
+      className={cn("text-destructive -mt-2.5 text-xs min-h-4 font-normal", className)}
       {...props}
     >
       {content}
