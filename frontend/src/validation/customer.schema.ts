@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const customerSchema = z.object({
+    _id: z.number().optional(),
     name: z
         .string()
         .trim()

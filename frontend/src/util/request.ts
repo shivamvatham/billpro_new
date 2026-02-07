@@ -37,13 +37,22 @@ axiosInstance.interceptors.response.use(
     if (message) {
       toast.success(message);
     }
-    return response;
+    return response.data;
   },
   (error: AxiosError) => {
-    const message =
-      (error?.response?.data as { message?: string })?.message ||
-      "An error occurred";
-    toast.error(message);
+    const status = error?.response?.status;
+    const message = (error?.response?.data as { message?: string })?.message;
+    if (status === 401) {
+      toast.error("Unauthorized. Please login again.");
+    } else if (status === 403) {
+      toast.error("Access denied.");
+    } else if (status === 404) {
+      toast.error("Resource not found.");
+    } else if (status === 500) {
+      toast.error("Server error. Please try again later.");
+    } else {
+      toast.error(message || "An error occurred");
+    }
     return Promise.reject(error?.response?.data || "An error occurred");
   }
 );

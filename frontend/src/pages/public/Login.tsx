@@ -33,9 +33,10 @@ export default function Login() {
     const onSubmit = async (data: z.infer<typeof loginSchema>) => {
         try {
             const response = await axios.post('/auth/login', data)
+            console.log(response)
             dispatch(setCredentials({
-                token: response.data.token,
-                user: response.data.data.user,
+                token: (response as unknown as {token : string}).token,
+                user: response.data.user,
             }))
             navigate('/')
         } catch (error) {

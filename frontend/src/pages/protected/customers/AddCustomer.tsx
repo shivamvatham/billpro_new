@@ -200,7 +200,7 @@ export default function AddCustomer() {
               )}
             />
           </div>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
+          <Button className="min-w-32" type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <Spinner data-icon="inline-start" />
             ) : (
