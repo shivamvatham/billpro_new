@@ -8,7 +8,12 @@ const cutomerSchema = new mongoose.Schema({
     },
     contactNumber: {
         type: String,
-        minlength: 3,
+        validate: {
+            validator: function (v) {
+                return !v || v.length >= 3;
+            },
+            message: 'Contact number cannot be less than 3 digits'
+        },
         default: null,
     },
     email: {
