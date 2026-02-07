@@ -121,3 +121,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-sonner-toast] [data-close-button] {
+  left: auto !important;
+  right: 0 !important;
+  top: 50% !important;
+  margin-right: 10px;
+  transform: translateY(-50%) !important;
+}
+
