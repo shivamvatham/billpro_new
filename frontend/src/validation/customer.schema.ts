@@ -56,9 +56,9 @@ export const customerSchema = z.object({
         .number()
         .int({ message: "Credit period must be a whole number" })
         .min(0, { message: "Credit period cannot be negative" })
-        .default(0),
+        .nullable(),
 
-    openingBalance: z.number().default(0),
+    openingBalance: z.number().nullable(),
 });
 
 export type Customer = z.infer<typeof customerSchema>;

@@ -71,14 +71,19 @@ exports.createCustomer = catchAsync(async (req, res, next) => {
 
 // Get All Customers (for current tenant)
 exports.getAllCustomers = catchAsync(async (req, res, next) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = (page - 1) * limit;
+    // const page = parseInt(req.query.page) || 1;
+    // const limit = parseInt(req.query.limit) || 20;
+    // const skip = (page - 1) * limit;
+
+    // const customers = await Customer.find({ tenant: req.user.tenantId })
+    //     .sort({ createdAt: -1 })
+    //     .skip(skip)
+    //     .limit(limit)
+    //     .select('-__v -tenant');
 
     const customers = await Customer.find({ tenant: req.user.tenantId })
         .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+        .select('-__v -tenant');
 
     const total = await Customer.countDocuments({ tenant: req.user.tenantId });
 
@@ -86,13 +91,14 @@ exports.getAllCustomers = catchAsync(async (req, res, next) => {
         success: true,
         data: {
             customers,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalCustomers: total,
-                hasNext: page < Math.ceil(total / limit),
-                hasPrev: page > 1
-            }
+            // pagination: {
+            //     currentPage: page,
+            //     totalPages: Math.ceil(total / limit),
+            //     totalCustomers: total,
+            //     hasNext: page < Math.ceil(total / limit),
+            //     hasPrev: page > 1
+            // }
+            totalCustomers: total,
         }
     });
 });
@@ -102,7 +108,7 @@ exports.getCustomer = catchAsync(async (req, res, next) => {
     const customer = await Customer.findOne({
         _id: req.params.id,
         tenant: req.user.tenantId
-    });
+    }).select('-tenant -createdAt -updatedAt -__v -_id');
 
     if (!customer) {
         return next(new ApiError(404, 'Customer not found'));

@@ -17,8 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { INDIAN_STATES_WITH_GST_CODE } from "@/constants/indian-states";
+import { useNavigate } from "react-router";
 
 export default function AddCustomer() {
+  const navigate = useNavigate()
+
   const form = useForm({
     resolver: zodResolver(customerSchema),
     mode: "onChange",
@@ -29,15 +32,20 @@ export default function AddCustomer() {
       address: "",
       state: "24-Gujarat",
       gstNumber: "",
-      creditPeriodDays: 0,
-      openingBalance: 0,
+      creditPeriodDays: null,
+      openingBalance: null,
     },
   });
 
   const onSubmit = async (data: Customer) => {
+    const datas = {
+      ...data,
+      creditPeriodDays: data.creditPeriodDays ?? 0,
+      openingBalance: data.openingBalance ?? 0
+    }
     try {
-      const response = await axios.post("/customers", data);
-      console.log("Customer added:", response.data);
+      await axios.post("/customers", datas);
+      navigate('/customer/list')
       form.reset();
     } catch (error) {
       console.log("error", error);
@@ -155,8 +163,10 @@ export default function AddCustomer() {
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ''}
                     id="creditPeriodDays"
                     type="number"
+                    placeholder="Enter Credit Period"
                     onChange={(e) => field.onChange(Number(e.target.value))}
                     aria-invalid={fieldState.invalid}
                   />
@@ -174,8 +184,10 @@ export default function AddCustomer() {
                   </FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ''}
                     id="openingBalance"
                     type="number"
+                    placeholder="Enter Opening Balance"
                     onChange={(e) => field.onChange(Number(e.target.value))}
                     aria-invalid={fieldState.invalid}
                   />
