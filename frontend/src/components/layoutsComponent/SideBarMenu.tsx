@@ -1,4 +1,4 @@
-import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon } from "lucide-react"
+import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon, Settings } from "lucide-react"
 import { protectedRoute } from "@/app/routes/config"
 import React from "react"
 
@@ -8,6 +8,7 @@ const iconMap: Record<string, LucideIcon> = {
   List,
   UserRoundPlus,
   UserRoundPen,
+  Settings
 }
 
 import {
@@ -33,9 +34,9 @@ export function SideBarMenu() {
       <SidebarGroupLabel>Welocome To Bill Pro</SidebarGroupLabel>
       <SidebarMenu>
         {protectedRoute.map((item) => (
-          item.children ? (
+          item.children && item.children.some(child => !child.hidden) ? (
             <Collapsible
-              key={item.title}
+              key={item.name}
               asChild
               defaultOpen={item.isActive ? item.isActive : false}
               className="group/collapsible"
@@ -52,7 +53,7 @@ export function SideBarMenu() {
                   <SidebarMenuSub>
                     {item.children?.map((subItem) => (
                       subItem.path && !subItem.hidden &&(
-                        <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubItem key={subItem.name}>
                           <SidebarMenuSubButton asChild>
                             <NavLink to={subItem.path}>
                               {subItem.icon && iconMap[subItem.icon] && React.createElement(iconMap[subItem.icon])}
@@ -68,7 +69,7 @@ export function SideBarMenu() {
             </Collapsible>
           ) : (
             item.path && !item.hidden && (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild tooltip={item.title}>
                   <NavLink to={item.path}>
                     {item.icon && iconMap[item.icon] && React.createElement(iconMap[item.icon])}

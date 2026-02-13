@@ -48,6 +48,36 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.changePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, confirmNewPassword, newPassword } = req.body;
+  console.log(req.body)
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    return next(new ApiError(400, 'Please provide current new password and confirm password'));
+  }
+
+  if (confirmNewPassword !== newPassword) {
+    return next(new ApiError(400, 'New password and confirm password does not match'))
+  }
+
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!(await bcrypt.compare(currentPassword, user.password))) {
+    return next(new ApiError(401, 'Current password is incorrect'))
+  }
+
+  if (currentPassword === newPassword) {
+    return next(new ApiError(400, 'New password must be different from current password'));
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Password changes succesfully'
+  });
+})
+
 exports.getMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).populate('tenant');
 

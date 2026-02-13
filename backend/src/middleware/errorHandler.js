@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
     message: error.message,
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'production') {
     response.stack = error.stack;
   }
 

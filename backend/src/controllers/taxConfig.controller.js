@@ -61,7 +61,6 @@ const taxConfigSchema = Joi.object({
 
 // Create Tax Config
 exports.createTaxConfig = catchAsync(async (req, res, next) => {
-  console.log(req);
   const { error, value } = taxConfigSchema.validate(req.body, {
     abortEarly: false,
   });

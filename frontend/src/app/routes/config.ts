@@ -60,4 +60,27 @@ export const protectedRoute: AppRoute[] = [
       }
     ]
   },
+  {
+    title: "Settings",
+    icon: "Settings",
+    name: "settings",
+    path: '/settings',
+    element: lazy(()=> import("@/pages/protected/settings/SettingsConfig")),
+    children: [
+      {
+        title: "General Settings",
+        name: "settings.general",
+        path: "/settings/general",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/settings/General")),
+      },
+      {
+        title: "Portal Settings",
+        name: "settings.portal",
+        path: "/settings/portal",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/settings/Portal")),
+      }
+    ]
+  }
 ];
