@@ -7,6 +7,12 @@ const taxConfigSchema = new mongoose.Schema(
       required: true,
       enum: ["None", "GST", "Service"],
     },
+    taxNumber: {
+      type: String,
+      required: function () {
+        return this.taxType === "GST" || this.taxType === "Service";
+      },
+    },
     tax1: {
       taxName: {
         type: String,

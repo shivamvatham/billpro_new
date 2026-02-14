@@ -43,11 +43,11 @@ axiosInstance.interceptors.response.use(
     const status = error?.response?.status;
     const message = (error?.response?.data as { message?: string })?.message;
     if (status === 401) {
-      toast.error("Unauthorized. Please login again.");
+      toast.error(message || "Unauthorized. Please login again.");
     } else if (status === 403) {
-      toast.error("Access denied.");
+      toast.error(message || "Access denied.");
     } else if (status === 404) {
-      toast.error("Resource not found.");
+      toast.error(message || "Resource not found.");
     } else if (status === 500) {
       toast.error("Server error. Please try again later.");
     } else {

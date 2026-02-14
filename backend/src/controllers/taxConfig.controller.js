@@ -9,6 +9,14 @@ const taxConfigSchema = Joi.object({
     "any.required": "Tax type must be GST, Service, or None",
     "any.only": "Tax type must be GST, Service, or None",
   }),
+  taxNumber: Joi.string().when("taxType", {
+    is: Joi.valid("GST", "Service"),
+    then: Joi.required().messages({
+      "string.empty": "Tax number is required",
+      "any.required": "Tax number is required",
+    }),
+    otherwise: Joi.optional().allow(null, ""),
+  }),
   tax1: Joi.object({
     taxName: Joi.string().required().messages({
       "string.empty": "Tax name is required",
@@ -66,12 +74,13 @@ exports.createTaxConfig = catchAsync(async (req, res, next) => {
   });
 
   if (error) {
-    const errors = error.details.map((detail) => detail.message).join(", ");
-    return next(new ApiError(400, errors));
+    // const errors = error.details.map((detail) => detail.message).join(", ");
+    return next(new ApiError(400, error.details[0].message));
   }
 
   let updateData = { ...value, tenant: req.user.tenantId };
   if (value.taxType === "None") {
+    updateData.taxNumber = null;
     updateData.tax1 = null;
     updateData.tax2 = null;
     updateData.tax3 = null;
@@ -99,6 +108,7 @@ exports.getTaxConfig = catchAsync(async (req, res, next) => {
   if (!taxConfig) {
     taxConfig = {
       taxType: "None",
+      taxNumber: null,
       tax1: null,
       tax2: null,
       tax3: null,

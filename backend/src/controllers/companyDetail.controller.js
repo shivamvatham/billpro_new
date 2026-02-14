@@ -48,15 +48,16 @@ exports.createCompanyDetail = catchAsync(async (req, res, next) => {
   });
 
   if (error) {
-    const errors = error.details.map((detail) => detail.message).join(", ");
-    return next(new ApiError(400, errors));
+    // const errors = error.details.map((detail) => detail.message).join(", ");
+    // console.log(error);
+    return next(new ApiError(400, error.details[0].message));
   }
 
   const companyDetail = await CompanyDetail.findOneAndUpdate(
     { tenant: req.user.tenantId },
     { ...value, tenant: req.user.tenantId },
     { new: true, upsert: true, runValidators: true }
-  ).select("-_id -tenant -__v -createdAt -updatedAt");
+  ).select("-_id -tenant -__v -createdAt -updatedAt -logo");
 
   res.status(201).json({
     success: true,
@@ -69,7 +70,7 @@ exports.createCompanyDetail = catchAsync(async (req, res, next) => {
 exports.getCompanyDetail = catchAsync(async (req, res, next) => {
   const companyDetail = await CompanyDetail.findOne({
     tenant: req.user.tenantId,
-  }).select("-_id -tenant -__v -createdAt -updatedAt");
+  }).select("-_id -tenant -__v -createdAt -updatedAt -logo");
 
   if (!companyDetail) {
     return res.status(200).json({ status: true, data: { companyDetail: {} } });
@@ -81,25 +82,62 @@ exports.getCompanyDetail = catchAsync(async (req, res, next) => {
   });
 });
 
+// get company logo
+
+exports.getCompanyLogo = catchAsync(async (req, res, next) => {
+  const companyDetail = await CompanyDetail.findOne({
+    tenant: req.user.tenantId,
+  }).select("logo -_id");
+  if (!companyDetail || !companyDetail.logo) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        logo: null,
+      },
+    });
+  }
+  res.status(200).json({
+    status: true,
+    data: { logo: companyDetail.logo },
+  });
+});
+
+// remove company logo
+
+exports.removeCompanyLogo = catchAsync(async (req, res, next) => {
+  const companyDetail = await CompanyDetail.findOne({
+    tenant: req.user.tenantId,
+  });
+
+  if (!companyDetail || !companyDetail.logo) {
+    return next(new ApiError(404, "Logo not found"));
+  }
+
+  // Delete logo file from disk
+  const logoPath = path.join(__dirname, "../../", companyDetail.logo);
+  if (fs.existsSync(logoPath)) {
+    fs.unlinkSync(logoPath);
+  }
+
+  // Update database - set logo to null
+  await CompanyDetail.findOneAndUpdate(
+    { tenant: req.user.tenantId },
+    { logo: null }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Logo removed successfully",
+  });
+});
+
 // Update Logo
 exports.updateLogo = catchAsync(async (req, res, next) => {
   if (!req.file) {
     return next(new ApiError(400, "Logo file is required"));
   }
 
-  const companyDetail = await CompanyDetail.findOne({
-    tenant: req.user.tenantId,
-  });
-
-  // Delete old logo if exists
-  if (companyDetail && companyDetail.logo) {
-    const oldLogoPath = path.join(__dirname, "../../", companyDetail.logo);
-    if (fs.existsSync(oldLogoPath)) {
-      fs.unlinkSync(oldLogoPath);
-    }
-  }
-
-  const logoPath = `/uploads/logos/${req.file.filename}`;
+  const logoPath = `/uploads/${req.file.filename}`;
 
   await CompanyDetail.findOneAndUpdate(
     { tenant: req.user.tenantId },

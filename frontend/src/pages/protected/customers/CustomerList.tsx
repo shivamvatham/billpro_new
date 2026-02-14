@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "@/util/request";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const columns: ColumnDef<Customer>[] = [
   {
@@ -44,6 +45,8 @@ export default function CustomerList() {
   const navigate = useNavigate()
 
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const fetchCustomers = async () => {
     try {
       const response = await axios.get("/customers");
@@ -57,12 +60,21 @@ export default function CustomerList() {
     navigate(`/customer/edit/${customer._id}`)
   };
 
-  const handleDelete = async (customer: Customer) => {
+  const handleDelete = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedCustomer) return;
     try {
-      await axios.delete(`/customers/${customer._id}`);
+      await axios.delete(`/customers/${selectedCustomer._id}`);
       fetchCustomers();
     } catch (error) {
       console.log("Error deleting customer:", error);
+    } finally {
+      setDeleteDialog(false);
+      setSelectedCustomer(null);
     }
   };
 
@@ -87,14 +99,23 @@ export default function CustomerList() {
   }, []);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Customer List</CardTitle>
-        <CardAction><Button variant="outline" onClick={() => navigate('/customer/add')}><UserPlus /> Add Customer</Button></CardAction>
-      </CardHeader>
-      <CardContent>
-        <DataTable columns={columns} data={customers} searchKey="name" enableSorting actions={actions} />
-      </CardContent>
-    </Card>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer List</CardTitle>
+          <CardAction><Button variant="outline" onClick={() => navigate('/customer/add')}><UserPlus /> Add Customer</Button></CardAction>
+        </CardHeader>
+        <CardContent>
+          <DataTable columns={columns} data={customers} searchKey="name" enableSorting actions={actions} />
+        </CardContent>
+      </Card>
+      <ConfirmDialog
+        open={deleteDialog}
+        onOpenChange={setDeleteDialog}
+        onConfirm={confirmDelete}
+        title="Delete Customer"
+        description={`Are you sure you want to delete <h1>${selectedCustomer?.name}</h1>?`}
+      />
+    </>
   );
 }

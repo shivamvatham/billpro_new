@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 
 // Create uploads directory if it doesn't exist
-const uploadDir = "uploads/logos";
+const uploadDir = "uploads";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -15,7 +15,15 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const tenantId = req.user.tenantId;
-    cb(null, `logo-${tenantId}${ext}`);
+    const filename = `logo-${tenantId}${ext}`;
+    
+    // Delete old logo before saving new one
+    const oldFilePath = path.join(uploadDir, filename);
+    if (fs.existsSync(oldFilePath)) {
+      fs.unlinkSync(oldFilePath);
+    }
+    
+    cb(null, filename);
   },
 });
 
