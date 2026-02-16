@@ -36,7 +36,8 @@ const customerSchema = Joi.object({
             'string.pattern.base': 'Invalid GST number format'
         }),
     creditPeriodDays: Joi.number().integer().min(0).default(0),
-    openingBalance: Joi.number().default(0)
+    openingBalance: Joi.number().default(0),
+    balanceType: Joi.string().valid('purchase', 'sales').default('sales')
 });
 
 // Create Customer
@@ -55,6 +56,12 @@ exports.createCustomer = catchAsync(async (req, res, next) => {
 
     if (existingCustomer) {
         return next(new ApiError(400, 'Customer name already exists'));
+    }
+
+    if (value.openingBalance && value.balanceType === 'purchase') {
+        value.openingBalance = -Math.abs(value.openingBalance);
+    } else if (value.openingBalance && value.balanceType === 'sales') {
+        value.openingBalance = Math.abs(value.openingBalance);
     }
 
     const customer = await Customer.create({
@@ -142,6 +149,14 @@ exports.updateCustomer = catchAsync(async (req, res, next) => {
 
         if (nameExists) {
             return next(new ApiError(400, 'Another customer with this name already exists'));
+        }
+    }
+
+    if (value.openingBalance !== undefined && value.balanceType) {
+        if (value.balanceType === 'purchase') {
+            value.openingBalance = -Math.abs(value.openingBalance);
+        } else if (value.balanceType === 'sales') {
+            value.openingBalance = Math.abs(value.openingBalance);
         }
     }
 

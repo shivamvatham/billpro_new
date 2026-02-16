@@ -114,7 +114,7 @@ export default function CustomerList() {
         onOpenChange={setDeleteDialog}
         onConfirm={confirmDelete}
         title="Delete Customer"
-        description={`Are you sure you want to delete <h1>${selectedCustomer?.name}</h1>?`}
+        description={`Are you sure you want to delete ${selectedCustomer?.name}?`}
       />
     </>
   );

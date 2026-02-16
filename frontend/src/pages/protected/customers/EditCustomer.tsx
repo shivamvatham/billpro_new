@@ -36,6 +36,7 @@ export default function AddCustomer() {
             gstNumber: "",
             creditPeriodDays: null,
             openingBalance: null,
+            balanceType: "sales",
         },
     });
 
@@ -208,6 +209,27 @@ export default function AddCustomer() {
                                         onChange={(e) => field.onChange(Number(e.target.value))}
                                         aria-invalid={fieldState.invalid}
                                     />
+                                    <FieldError errors={[fieldState.error]} />
+                                </Field>
+                            )}
+                        />
+                        <Controller
+                            name="balanceType"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel>Balance Type</FieldLabel>
+                                    <Select value={field.value} onValueChange={field.onChange}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectGroup>
+                                                <SelectItem value="sales">Sales</SelectItem>
+                                                <SelectItem value="purchase">Purchase</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                     <FieldError errors={[fieldState.error]} />
                                 </Field>
                             )}

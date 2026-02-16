@@ -59,6 +59,7 @@ export const customerSchema = z.object({
         .nullable(),
 
     openingBalance: z.number().nullable(),
+    balanceType: z.enum(["purchase", "sales"]).default("sales"),
 });
 
 export type Customer = z.infer<typeof customerSchema>;

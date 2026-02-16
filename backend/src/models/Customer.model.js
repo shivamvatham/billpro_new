@@ -41,6 +41,12 @@ const cutomerSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    balanceType: {
+        type: String,
+        enum: ['purchase', 'sales'],
+        default: 'sales'
+    },
+    
     tenant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tenant',

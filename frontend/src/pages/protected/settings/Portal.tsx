@@ -155,6 +155,7 @@ export default function Portal() {
                   <div className="relative">
                     <Input
                       {...field}
+                      autoComplete="false"
                       id="currentPassword"
                       type={showCurrentPassword ? "text" : "password"}
                       placeholder="Enter current password"
@@ -188,6 +189,7 @@ export default function Portal() {
                     <Input
                       {...field}
                       id="newPassword"
+                      autoComplete="false"
                       type={showNewPassword ? "text" : "password"}
                       placeholder="Enter new password"
                       aria-invalid={fieldState.invalid}
@@ -220,6 +222,7 @@ export default function Portal() {
                     <Input
                       {...field}
                       id="confirmNewPassword"
+                      autoComplete="false"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm new password"
                       aria-invalid={fieldState.invalid}
