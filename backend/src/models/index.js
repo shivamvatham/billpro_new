@@ -5,6 +5,9 @@ const tenent = require("./Tenant.model");
 const user = require("./User.model");
 const customer = require("./Customer.model");
 const taxConfig = require("./TaxConfig.model");
+const companyDetails = require("./CompanyDetails.model");
+const productUnit = require("./ProductUnit.model");
+const productCategory = require("./ProductCategory.model");
 
 // Optional: Export them if you want to use elsewhere
 module.exports = {
@@ -12,4 +15,7 @@ module.exports = {
   User: user,
   Customer: customer,
   TaxConfig: taxConfig,
+  CompanyDetails: companyDetails,
+  ProductUnit: productUnit,
+  ProductCategory: productCategory,
 };

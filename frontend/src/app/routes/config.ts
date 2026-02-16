@@ -7,7 +7,7 @@ export type AppRoute = {
   name?: string;
   icon?: string;
   hidden?: boolean;
-  isActive?:boolean;
+  isActive?: boolean;
   children?: AppRoute[];
 };
 
@@ -57,15 +57,40 @@ export const protectedRoute: AppRoute[] = [
         hidden: true,
         path: "/customer/edit/:id",
         element: lazy(() => import("@/pages/protected/customers/EditCustomer")),
-      }
-    ]
+      },
+    ],
+  },
+  {
+    title: "Products",
+    icon: "Package",
+    name: "products",
+    children: [
+      {
+        title: "Product Units",
+        name: "products.units",
+        path: "/product-unit",
+        icon: "Scale",
+        element: lazy(
+          () => import("@/pages/protected/product-units/ProductUnitList")
+        ),
+      },
+      {
+        title: "Product Categories",
+        name: "products.categories",
+        path: "/product-category",
+        icon: "FolderTree",
+        element: lazy(
+          () => import("@/pages/protected/product-categories/ProductCategoryList")
+        ),
+      },
+    ],
   },
   {
     title: "Settings",
     icon: "Settings",
     name: "settings",
-    path: '/settings',
-    element: lazy(()=> import("@/pages/protected/settings/SettingsConfig")),
+    path: "/settings",
+    element: lazy(() => import("@/pages/protected/settings/SettingsConfig")),
     children: [
       {
         title: "General Settings",
@@ -80,7 +105,7 @@ export const protectedRoute: AppRoute[] = [
         path: "/settings/portal",
         hidden: true,
         element: lazy(() => import("@/pages/protected/settings/Portal")),
-      }
-    ]
-  }
+      },
+    ],
+  },
 ];

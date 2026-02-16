@@ -1,4 +1,4 @@
-import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon, Settings } from "lucide-react"
+import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon, Settings, Package, Scale, FolderTree } from "lucide-react"
 import { protectedRoute } from "@/app/routes/config"
 import React from "react"
 
@@ -8,7 +8,10 @@ const iconMap: Record<string, LucideIcon> = {
   List,
   UserRoundPlus,
   UserRoundPen,
-  Settings
+  Settings,
+  Package,
+  Scale,
+  FolderTree
 }
 
 import {

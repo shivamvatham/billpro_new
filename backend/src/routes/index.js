@@ -3,6 +3,8 @@ const authRoutes = require('./auth.routes');
 const customerRoutes = require('./customer.routes');
 const taxConfig = require('./taxConfig.routes');
 const companyDetail = require('./companyDetail.routes');
+const productUnitRoutes = require('./productUnit.routes');
+const productCategoryRoutes = require('./productCategory.routes');
 
 const router = express.Router();
 
@@ -17,5 +19,7 @@ router.use('/auth', authRoutes);
 router.use('/customers', customerRoutes);
 router.use('/taxconfig', taxConfig);
 router.use('/companydetail', companyDetail);
+router.use('/productunits', productUnitRoutes);
+router.use('/productcategories', productCategoryRoutes);
 
 module.exports = router;
