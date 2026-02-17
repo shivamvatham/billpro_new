@@ -6,7 +6,11 @@ export const productSchema = z.object({
   price: z.number().min(0),
   unit: z.string().min(1, "Unit is required"),
   category: z.string().min(1, "Category is required"),
-  productTax: z.string().optional().or(z.literal("")),
+  productTax: z.object({
+    tax1Rate: z.number().optional(),
+    tax2Rate: z.number().optional(),
+    tax3Rate: z.number().optional(),
+  }).optional(),
   quantity: z.number().optional(),
   reorder: z.number().optional(),
   barcodeNumber: z.string().optional().or(z.literal("")),

@@ -19,11 +19,33 @@ const productSchema = Joi.object({
   category: Joi.string().required().messages({
     "any.required": "Category is required",
   }),
-  productTax: Joi.string().allow(null, ""),
+  productTax: Joi.object({
+    tax1Rate: Joi.number().allow(null),
+    tax2Rate: Joi.number().allow(null),
+    tax3Rate: Joi.number().allow(null),
+  }).optional(),
   quantity: Joi.number(),
   reorder: Joi.number(),
   barcodeNumber: Joi.string().trim().allow(null, ""),
 });
+
+const validateProductTax = async (productTax, tenantId, next) => {
+  if (productTax && (productTax.tax1Rate || productTax.tax2Rate || productTax.tax3Rate)) {
+    const taxConfig = await TaxConfig.findOne({ tenant: tenantId });
+    if (!taxConfig) {
+      return next(new ApiError(400, "Tax config not set"));
+    }
+    if (productTax.tax1Rate && !taxConfig.tax1?.taxRate) {
+      return next(new ApiError(400, "Tax1 not configured"));
+    }
+    if (productTax.tax2Rate && !taxConfig.tax2?.taxRate) {
+      return next(new ApiError(400, "Tax2 not configured"));
+    }
+    if (productTax.tax3Rate && !taxConfig.tax3?.taxRate) {
+      return next(new ApiError(400, "Tax3 not configured"));
+    }
+  }
+};
 
 exports.createProduct = catchAsync(async (req, res, next) => {
   const { error, value } = productSchema.validate(req.body, {
@@ -59,15 +81,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     return next(new ApiError(400, "Invalid category"));
   }
 
-  if (value.productTax) {
-    const taxExists = await TaxConfig.findOne({
-      _id: value.productTax,
-      tenant: req.user.tenantId,
-    });
-    if (!taxExists) {
-      return next(new ApiError(400, "Invalid tax config"));
-    }
-  }
+  await validateProductTax(value.productTax, req.user.tenantId, next);
 
   const product = await Product.create({
     ...value,
@@ -85,7 +99,6 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find({ tenant: req.user.tenantId })
     .populate("unit", "unitName")
     .populate("category", "categoryName")
-    .populate("productTax")
     .sort({ createdAt: -1 })
     .select("-__v -tenant");
 
@@ -105,7 +118,6 @@ exports.getProduct = catchAsync(async (req, res, next) => {
   })
     .populate("unit", "unitName")
     .populate("category", "categoryName")
-    .populate("productTax")
     .select("-__v -tenant");
 
   if (!product) {
@@ -162,15 +174,7 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
     }
   }
 
-  if (value.productTax) {
-    const taxExists = await TaxConfig.findOne({
-      _id: value.productTax,
-      tenant: req.user.tenantId,
-    });
-    if (!taxExists) {
-      return next(new ApiError(400, "Invalid tax config"));
-    }
-  }
+  await validateProductTax(value.productTax, req.user.tenantId, next);
 
   const product = await Product.findOneAndUpdate(
     { _id: req.params.id, tenant: req.user.tenantId },

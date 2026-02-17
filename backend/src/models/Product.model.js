@@ -27,8 +27,15 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     productTax: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "TaxConfig",
+      tax1Rate: {
+        type: Number,
+      },
+      tax2Rate: {
+        type: Number,
+      },
+      tax3Rate: {
+        type: Number,
+      },
     },
     quantity: {
       type: Number,

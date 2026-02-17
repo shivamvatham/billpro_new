@@ -98,18 +98,8 @@ export default function General() {
       const payload = {
         ...data,
         tax1: data.taxType === "None" || !data.tax1?.taxName ? null : data.tax1,
-        tax2:
-          data.taxType === "None" ||
-          data.taxType === "Service" ||
-          !data.tax2?.taxName
-            ? null
-            : data.tax2,
-        tax3:
-          data.taxType === "None" ||
-          data.taxType === "Service" ||
-          !data.tax3?.taxName
-            ? null
-            : data.tax3,
+        tax2: data.taxType === "None" || !data.tax2?.taxName ? null : data.tax2,
+        tax3: data.taxType === "None" || !data.tax3?.taxName ? null : data.tax3,
       };
       const res = await axios.post("/taxconfig", payload);
       taxForm.reset(res.data.taxConfig);

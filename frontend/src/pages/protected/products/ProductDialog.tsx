@@ -22,7 +22,7 @@ interface ProductDialogProps {
 export default function ProductDialog({ open, onOpenChange, product, onSuccess }: ProductDialogProps) {
   const [units, setUnits] = useState<ProductUnit[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [taxes, setTaxes] = useState<any[]>([]);
+  const [taxConfig, setTaxConfig] = useState<any>(null);
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -33,7 +33,11 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
       price: 0,
       unit: "",
       category: "",
-      productTax: "",
+      productTax: {
+        tax1Rate: undefined as number | undefined,
+        tax2Rate: undefined as number | undefined,
+        tax3Rate: undefined as number | undefined,
+      },
       quantity: undefined as number | undefined,
       reorder: undefined as number | undefined,
       barcodeNumber: "",
@@ -48,7 +52,7 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
         price: product.price || 0,
         unit: (product.unit as any)?._id || product.unit,
         category: (product.category as any)?._id || product.category,
-        productTax: (product.productTax as any)?._id || product.productTax || "",
+        productTax: product.productTax || { tax1Rate: undefined, tax2Rate: undefined, tax3Rate: undefined },
         quantity: product.quantity,
         reorder: product.reorder,
         barcodeNumber: product.barcodeNumber || "",
@@ -60,7 +64,7 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
         price: 0,
         unit: "",
         category: "",
-        productTax: "",
+        productTax: { tax1Rate: undefined, tax2Rate: undefined, tax3Rate: undefined },
         quantity: undefined,
         reorder: undefined,
         barcodeNumber: "",
@@ -78,8 +82,7 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
         ]);
         setUnits(unitsRes.data.productUnits || []);
         setCategories(categoriesRes.data.productCategories || []);
-        const taxData = taxesRes.data.taxConfig;
-        setTaxes(taxData ? [taxData] : []);
+        setTaxConfig(taxesRes.data.taxConfig || null);
       } catch (error) {
         console.log("Error fetching data:", error);
       }
@@ -103,7 +106,7 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? "Edit" : "Add"} Product</DialogTitle>
         </DialogHeader>
@@ -197,30 +200,6 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
               )}
             />
             <Controller
-              name="productTax"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Tax Config</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select tax (optional)" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectGroup>
-                        {taxes.map((tax) => (
-                          <SelectItem key={tax._id} value={tax._id}>
-                            {tax.taxType}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-            <Controller
               name="quantity"
               control={form.control}
               render={({ field, fieldState }) => (
@@ -267,6 +246,66 @@ export default function ProductDialog({ open, onOpenChange, product, onSuccess }
                 </Field>
               )}
             />
+            {taxConfig?.tax1 && (
+              <Controller
+                name="productTax.tax1Rate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="tax1Rate">{taxConfig.tax1.taxName} Rate (%)</FieldLabel>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      id="tax1Rate"
+                      type="number"
+                      placeholder={`Enter ${taxConfig.tax1.taxName} rate`}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            )}
+            {taxConfig?.tax2 && (
+              <Controller
+                name="productTax.tax2Rate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="tax2Rate">{taxConfig.tax2.taxName} Rate (%)</FieldLabel>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      id="tax2Rate"
+                      type="number"
+                      placeholder={`Enter ${taxConfig.tax2.taxName} rate`}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            )}
+            {taxConfig?.tax3 && (
+              <Controller
+                name="productTax.tax3Rate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="tax3Rate">{taxConfig.tax3.taxName} Rate (%)</FieldLabel>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      id="tax3Rate"
+                      type="number"
+                      placeholder={`Enter ${taxConfig.tax3.taxName} rate`}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            )}
           </div>
           <div className="flex gap-2 pt-2">
             <Button type="submit" disabled={form.formState.isSubmitting} className="min-w-32">
