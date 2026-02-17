@@ -66,6 +66,15 @@ export const protectedRoute: AppRoute[] = [
     name: "products",
     children: [
       {
+        title: "Product List",
+        name: "products.list",
+        path: "/products",
+        icon: "Package",
+        element: lazy(
+          () => import("@/pages/protected/products/ProductList")
+        ),
+      },
+      {
         title: "Product Units",
         name: "products.units",
         path: "/product-unit",

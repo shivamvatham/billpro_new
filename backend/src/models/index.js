@@ -8,6 +8,7 @@ const taxConfig = require("./TaxConfig.model");
 const companyDetails = require("./CompanyDetails.model");
 const productUnit = require("./ProductUnit.model");
 const productCategory = require("./ProductCategory.model");
+const product = require("./Product.model");
 
 // Optional: Export them if you want to use elsewhere
 module.exports = {
@@ -18,4 +19,5 @@ module.exports = {
   CompanyDetails: companyDetails,
   ProductUnit: productUnit,
   ProductCategory: productCategory,
+  Product: product,
 };
