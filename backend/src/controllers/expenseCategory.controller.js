@@ -23,7 +23,8 @@ exports.createExpenseCategory = catchAsync(async (req, res, next) => {
 });
 
 exports.getExpenseCategories = catchAsync(async (req, res) => {
-  const expenseCategories = await ExpenseCategory.find({ tenant: req.user.tenantId });
+  const expenseCategories = await ExpenseCategory.find({ tenant: req.user.tenantId })
+    .select("-tenant -__v");
   res.status(200).json({
     success: true,
     data: { expenseCategories: expenseCategories || [] },
@@ -34,7 +35,7 @@ exports.getExpenseCategoryById = catchAsync(async (req, res) => {
   const expenseCategory = await ExpenseCategory.findOne({
     _id: req.params.id,
     tenant: req.user.tenantId,
-  });
+  }).select("-tenant -__v");
   if (!expenseCategory) {
     return res.status(200).json({
       success: true,
@@ -66,7 +67,7 @@ exports.updateExpenseCategory = catchAsync(async (req, res, next) => {
     { _id: req.params.id, tenant: req.user.tenantId },
     { categoryName, categoryDescription },
     { new: true, runValidators: true }
-  );
+  ).select("-tenant -__v");
   if (!expenseCategory) {
     return res.status(404).json({ message: "Expense category not found" });
   }
