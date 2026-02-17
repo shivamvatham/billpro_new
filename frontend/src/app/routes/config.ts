@@ -113,6 +113,13 @@ export const protectedRoute: AppRoute[] = [
         icon: "Tags",
         element: lazy(() => import("@/pages/protected/accounts/ExpenseCategoryList")),
       },
+      {
+        title: "Expenses",
+        name: "accounts.expenses",
+        path: "/expenses",
+        icon: "Receipt",
+        element: lazy(() => import("@/pages/protected/accounts/ExpenseList")),
+      },
     ],
   },
   {

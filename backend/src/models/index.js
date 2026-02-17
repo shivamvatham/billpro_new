@@ -11,6 +11,7 @@ const productCategory = require("./ProductCategory.model");
 const product = require("./Product.model");
 const account = require("./Account.model");
 const expenseCategory = require("./ExpenseCategory.model");
+const expense = require("./Expense.model");
 
 // Optional: Export them if you want to use elsewhere
 module.exports = {
@@ -24,4 +25,5 @@ module.exports = {
   Product: product,
   Account: account,
   ExpenseCategory: expenseCategory,
+  Expense: expense,
 };

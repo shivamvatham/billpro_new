@@ -104,6 +104,9 @@ export function DataTable<TData, TValue>({
               ))}
             </div>
           ),
+          meta: {
+            sticky: true,
+          },
         } as ColumnDef<TData, TValue>,
       ]
     : processedColumns;
@@ -168,16 +171,22 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const isSticky = (header.column.columnDef.meta as { sticky?: boolean })?.sticky;
+                  return (
+                    <TableHead 
+                      key={header.id}
+                      className={isSticky ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]" : ""}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -185,11 +194,17 @@ export function DataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const isSticky = (cell.column.columnDef.meta as { sticky?: boolean })?.sticky;
+                    return (
+                      <TableCell 
+                        key={cell.id}
+                        className={isSticky ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]" : ""}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (

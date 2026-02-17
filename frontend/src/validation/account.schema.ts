@@ -8,6 +8,7 @@ export const accountSchema = z.object({
 
 export type Account = z.infer<typeof accountSchema> & {
   _id?: string;
+  currentBalance?: number;
   createdAt?: string;
   updatedAt?: string;
 };

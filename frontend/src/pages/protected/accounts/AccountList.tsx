@@ -29,6 +29,11 @@ const columns: ColumnDef<Account>[] = [
     header: "Opening Balance",
     cell: ({ row }) => row.original.openingBalance || 0,
   },
+  {
+    accessorKey: "currentBalance",
+    header: "Current Balance",
+    cell: ({ row }) => row.original.currentBalance || 0,
+  },
 ];
 
 export default function AccountList() {
@@ -57,6 +62,9 @@ export default function AccountList() {
       }
     };
     fetchAccounts();
+    
+    const interval = setInterval(fetchAccounts, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleEdit = (account: Account) => {
@@ -125,8 +133,8 @@ export default function AccountList() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row gap-4 items-start">
-        <Card className="w-full lg:w-96">
+       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 items-start">
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>{editingAccount ? "Edit" : "Add"} Account</CardTitle>
           </CardHeader>
@@ -204,7 +212,7 @@ export default function AccountList() {
             </form>
           </CardContent>
         </Card>
-        <Card className="w-full lg:flex-1">
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Accounts</CardTitle>
           </CardHeader>

@@ -16,6 +16,10 @@ const accountSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    currentBalance: {
+      type: Number,
+      default: 0,
+    },
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
