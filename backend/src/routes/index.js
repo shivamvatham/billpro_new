@@ -6,6 +6,8 @@ const companyDetail = require('./companyDetail.routes');
 const productUnitRoutes = require('./productUnit.routes');
 const productCategoryRoutes = require('./productCategory.routes');
 const productRoutes = require('./product.routes');
+const accountRoutes = require('./account.routes');
+const expenseCategoryRoutes = require('./expenseCategory.routes');
 
 const router = express.Router();
 
@@ -23,5 +25,7 @@ router.use('/companydetail', companyDetail);
 router.use('/productunits', productUnitRoutes);
 router.use('/productcategories', productCategoryRoutes);
 router.use('/products', productRoutes);
+router.use('/accounts', accountRoutes);
+router.use('/expensecategories', expenseCategoryRoutes);
 
 module.exports = router;

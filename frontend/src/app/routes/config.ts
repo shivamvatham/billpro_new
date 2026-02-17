@@ -95,6 +95,27 @@ export const protectedRoute: AppRoute[] = [
     ],
   },
   {
+    title: "Accounts",
+    icon: "Wallet",
+    name: "accounts",
+    children: [
+      {
+        title: "Account List",
+        name: "accounts.list",
+        path: "/accounts",
+        icon: "Wallet",
+        element: lazy(() => import("@/pages/protected/accounts/AccountList")),
+      },
+      {
+        title: "Expense Categories",
+        name: "accounts.expensecategories",
+        path: "/expense-categories",
+        icon: "Tags",
+        element: lazy(() => import("@/pages/protected/accounts/ExpenseCategoryList")),
+      },
+    ],
+  },
+  {
     title: "Settings",
     icon: "Settings",
     name: "settings",
