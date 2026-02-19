@@ -179,6 +179,8 @@ exports.updateCustomer = catchAsync(async (req, res, next) => {
 
 // Delete Customer
 exports.deleteCustomer = catchAsync(async (req, res, next) => {
+    const Payment = require('../models/Payment.model');
+    
     const customer = await Customer.findOneAndDelete({
         _id: req.params.id,
         tenant: req.user.tenantId
@@ -187,6 +189,11 @@ exports.deleteCustomer = catchAsync(async (req, res, next) => {
     if (!customer) {
         return next(new ApiError(404, 'Customer not found'));
     }
+
+    await Payment.deleteMany({
+        customer: req.params.id,
+        tenant: req.user.tenantId
+    });
 
     res.status(200).json({
         success: true,

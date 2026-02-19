@@ -12,6 +12,7 @@ const product = require("./Product.model");
 const account = require("./Account.model");
 const expenseCategory = require("./ExpenseCategory.model");
 const expense = require("./Expense.model");
+const payment = require("./Payment.model");
 
 // Optional: Export them if you want to use elsewhere
 module.exports = {
@@ -26,4 +27,5 @@ module.exports = {
   Account: account,
   ExpenseCategory: expenseCategory,
   Expense: expense,
+  Payment: payment,
 };

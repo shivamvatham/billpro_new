@@ -123,6 +123,32 @@ export const protectedRoute: AppRoute[] = [
     ],
   },
   {
+    title: "Payments",
+    icon: "Wallet",
+    name: "payments",
+    children: [
+      {
+        title: "Payment List",
+        name: "payments.list",
+        path: "/payments/list",
+        element: lazy(() => import("@/pages/protected/payments/PaymentList")),
+      },
+      {
+        title: "Add Payment",
+        name: "payments.add",
+        path: "/payments/add",
+        element: lazy(() => import("@/pages/protected/payments/AddPayment")),
+      },
+      {
+        title: "Edit Payment",
+        name: "payments.edit",
+        path: "/payments/edit/:id",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/payments/EditPayment")),
+      },
+    ],
+  },
+  {
     title: "Settings",
     icon: "Settings",
     name: "settings",

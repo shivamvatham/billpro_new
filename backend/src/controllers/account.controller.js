@@ -116,6 +116,22 @@ exports.updateAccount = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteAccount = catchAsync(async (req, res, next) => {
+  const Expense = require('../models/Expense.model');
+  const Payment = require('../models/Payment.model');
+
+  const [expenseCount, paymentCount] = await Promise.all([
+    Expense.countDocuments({ accountType: req.params.id, tenant: req.user.tenantId }),
+    Payment.countDocuments({ account: req.params.id, tenant: req.user.tenantId })
+  ]);
+
+  if (expenseCount > 0) {
+    return next(new ApiError(400, 'Cannot delete account that is used in expenses'));
+  }
+
+  if (paymentCount > 0) {
+    return next(new ApiError(400, 'Cannot delete account that is used in payments'));
+  }
+
   const account = await Account.findOneAndDelete({
     _id: req.params.id,
     tenant: req.user.tenantId,
