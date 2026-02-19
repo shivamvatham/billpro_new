@@ -10,6 +10,8 @@ const accountRoutes = require('./account.routes');
 const expenseCategoryRoutes = require('./expenseCategory.routes');
 const expenseRoutes = require('./expense.routes');
 const paymentRoutes = require('./payment.routes');
+const receiptRoutes = require('./receipt.routes');
+const salesSeriesRoutes = require('./salesSeries.routes');
 
 const router = express.Router();
 
@@ -31,5 +33,7 @@ router.use('/accounts', accountRoutes);
 router.use('/expensecategories', expenseCategoryRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/receipts', receiptRoutes);
+router.use('/salesseries', salesSeriesRoutes);
 
 module.exports = router;

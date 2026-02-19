@@ -92,7 +92,7 @@ export default function AddPayment() {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Customer Name</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className={cn(fieldState.invalid && "border-destructive")} aria-invalid={fieldState.invalid}>
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent position="popper">
@@ -115,8 +115,8 @@ export default function AddPayment() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Payment By</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                  <Select key={field.value} value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className={cn(fieldState.invalid && "border-destructive")} aria-invalid={fieldState.invalid}>
                       <SelectValue placeholder="Select account" />
                     </SelectTrigger>
                     <SelectContent position="popper">

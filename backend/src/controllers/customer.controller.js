@@ -180,6 +180,7 @@ exports.updateCustomer = catchAsync(async (req, res, next) => {
 // Delete Customer
 exports.deleteCustomer = catchAsync(async (req, res, next) => {
     const Payment = require('../models/Payment.model');
+    const Receipt = require('../models/Receipt.model');
     
     const customer = await Customer.findOneAndDelete({
         _id: req.params.id,
@@ -191,6 +192,11 @@ exports.deleteCustomer = catchAsync(async (req, res, next) => {
     }
 
     await Payment.deleteMany({
+        customer: req.params.id,
+        tenant: req.user.tenantId
+    });
+
+    await Receipt.deleteMany({
         customer: req.params.id,
         tenant: req.user.tenantId
     });

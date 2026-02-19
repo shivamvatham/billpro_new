@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { type PersistConfig, persistReducer, persistStore } from 'redux-persist';
 import localStorage from 'redux-persist/lib/storage';
-// import sessionStorage from 'redux-persist/lib/storage/session';
 import authReducer from '@/features/auth/authSlice';
+import themeReducer from './themeSlice';
 
 export interface RootState {
     auth: ReturnType<typeof authReducer>;
-    // ui: ReturnType<typeof uiReducer>;
+    theme: ReturnType<typeof themeReducer>;
 }
 
 export type AppDispatch = typeof store.dispatch;
@@ -17,18 +17,18 @@ const authPersistConfig: PersistConfig<ReturnType<typeof authReducer>> = {
     whitelist: ['token', 'user']
 }
 
-// const uiPersistConfig: PersistConfig<ReturnType<typeof authReducer>> = {
-//     key: 'ui',
-//     storage: sessionStorage,
-//     whitelist: []
-// }
+const themePersistConfig: PersistConfig<ReturnType<typeof themeReducer>> = {
+    key: 'theme',
+    storage: localStorage,
+    whitelist: ['theme']
+}
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
-// const persistedUiReducer = persistReducer(uiPersistConfig, authReducer);
+const persistedThemeReducer = persistReducer(themePersistConfig, themeReducer);
 
 const rootReducer = {
     auth: persistedAuthReducer,
-    // ui: persistedUiReducer,
+    theme: persistedThemeReducer,
 }
 
 export const store = configureStore({

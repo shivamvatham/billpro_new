@@ -13,6 +13,8 @@ const account = require("./Account.model");
 const expenseCategory = require("./ExpenseCategory.model");
 const expense = require("./Expense.model");
 const payment = require("./Payment.model");
+const receipt = require("./Receipt.model");
+const salesSeries = require("./SalesSeries.model");
 
 // Optional: Export them if you want to use elsewhere
 module.exports = {
@@ -28,4 +30,6 @@ module.exports = {
   ExpenseCategory: expenseCategory,
   Expense: expense,
   Payment: payment,
+  Receipt: receipt,
+  SalesSeries: salesSeries,
 };

@@ -1,4 +1,4 @@
-import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon, Settings, Package, Scale, FolderTree, Wallet, Tags, Receipt } from "lucide-react"
+import { ChevronRight, LayoutDashboard, List, UserRoundPlus, UserRoundPen, UsersRound, type LucideIcon, Settings, Package, Scale, FolderTree, Wallet, Tags, Receipt, ReceiptText, Plus, ShoppingCart, ListOrdered, Stone } from "lucide-react"
 import { protectedRoute } from "@/app/routes/config"
 import React from "react"
 
@@ -14,7 +14,12 @@ const iconMap: Record<string, LucideIcon> = {
   FolderTree,
   Wallet,
   Tags,
-  Receipt
+  Receipt,
+  ReceiptText,
+  Plus,
+  ShoppingCart,
+  ListOrdered,
+  Stone
 }
 
 import {
@@ -58,7 +63,7 @@ export function SideBarMenu() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {item.children?.map((subItem) => (
-                      subItem.path && !subItem.hidden &&(
+                      subItem.path && !subItem.hidden && (
                         <SidebarMenuSubItem key={subItem.name}>
                           <SidebarMenuSubButton asChild>
                             <NavLink to={subItem.path}>

@@ -7,7 +7,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "@/util/request";
 import { Spinner } from "@/components/ui/spinner";
-import { paymentSchema, type Payment } from "@/validation/payment.schema";
+import { receiptSchema, type Receipt } from "@/validation/receipt.schema";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -24,56 +24,54 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 
-export default function EditPayment() {
+export default function AddReceipt() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const [customers, setCustomers] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [customerName, setCustomerName] = useState("");
 
   const form = useForm({
-    resolver: zodResolver(paymentSchema),
+    resolver: zodResolver(receiptSchema),
     mode: "onChange",
     defaultValues: {
       customer: "",
       account: "",
-      paymentAmount: 0,
-      paymentDate: "",
-      paymentDescription: "",
+      receiptAmount: 0,
+      receiptDate: "",
+      receiptDescription: "",
     },
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [accountsRes, paymentRes] = await Promise.all([
+        const [customersRes, accountsRes] = await Promise.all([
+          axios.get("/customers"),
           axios.get("/accounts"),
-          axios.get(`/payments/${id}`),
         ]);
+        setCustomers(customersRes.data.customers || []);
         setAccounts(accountsRes.data.accounts || []);
-
-        const payment = paymentRes.data.payment;
-        if (payment) {
-          setCustomerName(payment.customer.name);
-          form.reset({
-            customer: payment.customer._id,
-            account: payment.account._id,
-            paymentAmount: payment.paymentAmount,
-            paymentDate: new Date(payment.paymentDate).toISOString().split('T')[0],
-            paymentDescription: payment.paymentDescription || "",
-          });
-        }
+        
+        const today = new Date().toISOString().split('T')[0];
+        form.reset({
+          customer: "",
+          account: accountsRes.data.accounts[0]?._id || "",
+          receiptAmount: 0,
+          receiptDate: today,
+          receiptDescription: "",
+        });
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchData();
-  }, [id]);
+  }, []);
 
-  const onSubmit = async (data: Payment) => {
+  const onSubmit = async (data: Receipt) => {
     try {
-      await axios.put(`/payments/${id}`, data);
-      navigate("/payments/list");
+      await axios.post("/receipts", data);
+      navigate("/receipts/list");
+      form.reset();
     } catch (error) {
       console.log("error", error);
     }
@@ -82,7 +80,7 @@ export default function EditPayment() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit Payment</CardTitle>
+        <CardTitle>Add Receipt</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
@@ -90,15 +88,24 @@ export default function EditPayment() {
             <Controller
               name="customer"
               control={form.control}
-              render={({ field }) => (
-                <Field>
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Customer Name</FieldLabel>
-                  <Input
-                    value={customerName}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <input type="hidden" {...field} />
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger aria-invalid={fieldState.invalid}>
+                      <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      <SelectGroup>
+                        {customers.map((customer) => (
+                          <SelectItem key={customer._id} value={customer._id}>
+                            {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
             />
@@ -107,7 +114,7 @@ export default function EditPayment() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Payment By</FieldLabel>
+                  <FieldLabel>Receipt By</FieldLabel>
                   <Select key={field.value} value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className={cn(fieldState.invalid && "border-destructive")} aria-invalid={fieldState.invalid}>
                       <SelectValue placeholder="Select account" />
@@ -127,17 +134,17 @@ export default function EditPayment() {
               )}
             />
             <Controller
-              name="paymentAmount"
+              name="receiptAmount"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="paymentAmount">Payment Amount</FieldLabel>
+                  <FieldLabel htmlFor="receiptAmount">Receipt Amount</FieldLabel>
                   <Input
                     {...field}
                     value={field.value || ''}
-                    id="paymentAmount"
+                    id="receiptAmount"
                     type="number"
-                    placeholder="Enter payment amount"
+                    placeholder="Enter receipt amount"
                     onChange={(e) => field.onChange(Number(e.target.value))}
                     aria-invalid={fieldState.invalid}
                   />
@@ -146,11 +153,11 @@ export default function EditPayment() {
               )}
             />
             <Controller
-              name="paymentDate"
+              name="receiptDate"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Payment Date</FieldLabel>
+                  <FieldLabel>Receipt Date</FieldLabel>
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -181,15 +188,15 @@ export default function EditPayment() {
               )}
             />
             <Controller
-              name="paymentDescription"
+              name="receiptDescription"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="paymentDescription">Description</FieldLabel>
+                  <FieldLabel htmlFor="receiptDescription">Description</FieldLabel>
                   <Textarea
                     {...field}
-                    id="paymentDescription"
-                    placeholder="Enter payment description (optional)"
+                    id="receiptDescription"
+                    placeholder="Enter receipt description (optional)"
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldError errors={[fieldState.error]} />
@@ -201,7 +208,7 @@ export default function EditPayment() {
             {form.formState.isSubmitting ? (
               <Spinner data-icon="inline-start" />
             ) : (
-              "Update Payment"
+              "Add Receipt"
             )}
           </Button>
         </form>

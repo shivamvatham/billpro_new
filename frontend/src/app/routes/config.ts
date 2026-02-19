@@ -32,6 +32,34 @@ export const protectedRoute: AppRoute[] = [
     element: lazy(() => import("@/pages/protected/dashboard/Dashboard")),
   },
   {
+    title: "Sales",
+    icon: "ShoppingCart",
+    name: "sales",
+    children: [
+      {
+        title: "Series List",
+        name: "sales.series.list",
+        icon: "List",
+        path: "/sales/series/list",
+        element: lazy(() => import("@/pages/protected/sales/sales-series/SalesSeriesList")),
+      },
+      {
+        title: "Add Series",
+        name: "sales.series.add",
+        icon: "Plus",
+        path: "/sales/series/add",
+        element: lazy(() => import("@/pages/protected/sales/sales-series/AddSalesSeries")),
+      },
+      {
+        title: "Edit Series",
+        name: "sales.series.edit",
+        path: "/sales/series/edit/:id",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/sales/sales-series/EditSalesSeries")),
+      },
+    ],
+  },
+  {
     title: "Customers",
     icon: "UsersRound",
     name: "customers",
@@ -94,6 +122,16 @@ export const protectedRoute: AppRoute[] = [
       },
     ],
   },
+   {
+    title: "Purchase",
+    icon: "Stone",
+    name: "purchase",
+    children: [
+      {
+      
+      },
+    ],
+  },
   {
     title: "Accounts",
     icon: "Wallet",
@@ -130,12 +168,14 @@ export const protectedRoute: AppRoute[] = [
       {
         title: "Payment List",
         name: "payments.list",
+        icon: "List",
         path: "/payments/list",
         element: lazy(() => import("@/pages/protected/payments/PaymentList")),
       },
       {
         title: "Add Payment",
         name: "payments.add",
+        icon: "Plus",
         path: "/payments/add",
         element: lazy(() => import("@/pages/protected/payments/AddPayment")),
       },
@@ -145,6 +185,34 @@ export const protectedRoute: AppRoute[] = [
         path: "/payments/edit/:id",
         hidden: true,
         element: lazy(() => import("@/pages/protected/payments/EditPayment")),
+      },
+    ],
+  },
+  {
+    title: "Receipts",
+    icon: "ReceiptText",
+    name: "receipts",
+    children: [
+      {
+        title: "Receipt List",
+        name: "receipts.list",
+        icon: "List",
+        path: "/receipts/list",
+        element: lazy(() => import("@/pages/protected/receipts/ReceiptList")),
+      },
+      {
+        title: "Add Receipt",
+        name: "receipts.add",
+        icon: "Plus",
+        path: "/receipts/add",
+        element: lazy(() => import("@/pages/protected/receipts/AddReceipt")),
+      },
+      {
+        title: "Edit Receipt",
+        name: "receipts.edit",
+        path: "/receipts/edit/:id",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/receipts/EditReceipt")),
       },
     ],
   },
