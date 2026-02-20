@@ -23,7 +23,8 @@ const salesSeriesSchema = Joi.object({
         'number.base': 'Template number must be a number',
         'number.min': 'Template number must be at least 1',
         'any.required': 'Template number is required'
-    })
+    }),
+    invoiceTaxable: Joi.boolean().default(true)
 });
 
 exports.createSalesSeries = catchAsync(async (req, res, next) => {

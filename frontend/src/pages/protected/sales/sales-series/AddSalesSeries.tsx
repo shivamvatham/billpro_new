@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "@/util/request";
@@ -23,6 +24,7 @@ export default function AddSalesSeries() {
       invoiceSeriesTerms: "",
       invoiceSeriesStartingNumber: 1,
       invoiceTemplateNumber: 1,
+      invoiceTaxable: true,
     },
   });
 
@@ -127,6 +129,22 @@ export default function AddSalesSeries() {
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Controller
+              name="invoiceTaxable"
+              control={form.control}
+              render={({ field }) => (
+                <Field className="flex items-center justify-center h-full">
+                  <div className="flex items-center gap-2 mb-3 lg:mb-0">
+                    <Checkbox
+                      id="invoiceTaxable"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <FieldLabel htmlFor="invoiceTaxable" className="-mt-2">Taxable Invoice</FieldLabel>
+                  </div>
                 </Field>
               )}
             />

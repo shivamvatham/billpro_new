@@ -7,6 +7,7 @@ export const salesSeriesSchema = z.object({
   invoiceSeriesTerms: z.string().optional(),
   invoiceSeriesStartingNumber: z.number().int().min(1, "Starting number must be at least 1"),
   invoiceTemplateNumber: z.number().int().min(1, "Template number is required"),
+  invoiceTaxable: z.boolean().default(true),
 });
 
 export type SalesSeries = z.infer<typeof salesSeriesSchema>;

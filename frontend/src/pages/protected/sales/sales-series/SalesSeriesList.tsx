@@ -15,6 +15,7 @@ type SalesSeries = {
   invoiceSeriesPrefix?: string;
   invoiceSeriesStartingNumber: number;
   invoiceTemplateNumber: number;
+  invoiceTaxable: boolean;
 };
 
 const columns: ColumnDef<SalesSeries>[] = [
@@ -38,6 +39,11 @@ const columns: ColumnDef<SalesSeries>[] = [
   {
     accessorKey: "invoiceTemplateNumber",
     header: "Template",
+  },
+  {
+    accessorKey: "invoiceTaxable",
+    header: "Taxable",
+    cell: ({ row }) => (row.original.invoiceTaxable ? "Yes" : "No"),
   },
 ];
 

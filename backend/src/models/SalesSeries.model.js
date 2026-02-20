@@ -31,6 +31,10 @@ const salesSeriesSchema = new mongoose.Schema({
         required: true,
         default: 1,
     },
+    invoiceTaxable: {
+        type: Boolean,
+        default: true,
+    },
     tenant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tenant',
