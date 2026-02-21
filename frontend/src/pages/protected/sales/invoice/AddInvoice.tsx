@@ -46,7 +46,6 @@ export default function AddInvoice() {
       invoiceNumber: "",
       shippingAddress: "",
       shippingAmount: 0,
-      paidAmount: 0,
       grossAmount: 0,
       invoiceDate: new Date(),
       dueDate: new Date(),

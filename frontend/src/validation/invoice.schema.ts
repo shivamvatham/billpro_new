@@ -16,7 +16,6 @@ export const invoiceSchema = z.object({
   invoiceNumber: z.string().min(1, "Invoice number is required"),
   shippingAddress: z.string().optional(),
   shippingAmount: z.number().min(0).optional(),
-  paidAmount: z.number().min(0).optional(),
   grossAmount: z.number().min(0, "Gross amount is required"),
   invoiceDate: z.date(),
   dueDate: z.date(),

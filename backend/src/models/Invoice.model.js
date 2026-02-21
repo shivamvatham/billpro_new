@@ -54,11 +54,6 @@ const invoiceSchema = new mongoose.Schema({
         default: 0,
         min: 0
     },
-    paidAmount: {
-        type: Number,
-        default: 0,
-        min: 0
-    },
     grossAmount: {
         type: Number,
         required: true,

@@ -19,7 +19,6 @@ const invoiceSchema = Joi.object({
     }),
     shippingAddress: Joi.string().trim().allow('', null),
     shippingAmount: Joi.number().min(0).default(0),
-    paidAmount: Joi.number().min(0).default(0),
     grossAmount: Joi.number().min(0).required().messages({
         'number.base': 'Gross amount must be a number',
         'any.required': 'Gross amount is required'
