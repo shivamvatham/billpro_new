@@ -46,7 +46,6 @@ const invoiceSchema = Joi.object({
                 'number.min': 'Quantity must be at least 1',
                 'any.required': 'Quantity is required'
             }),
-            rate: Joi.number().min(0).default(0),
             discountPercentage: Joi.number().min(0).max(100).default(0)
         })
     ).min(1).required().messages({
@@ -100,19 +99,22 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
     const expectedGrossAmount = calculatedTotal + (value.shippingAmount || 0);
 
-    if (Math.abs(expectedGrossAmount - value.grossAmount) > 0.01) {
+    if (Math.abs(expectedGrossAmount - value.grossAmount) > 1) {
         return next(new ApiError(400, `Gross amount mismatch. Expected: ${expectedGrossAmount.toFixed(2)}, Received: ${value.grossAmount}`));
     }
 
+    const roundedGrossAmount = Math.round(value.grossAmount);
+
     const invoice = await Invoice.create({
         ...value,
+        grossAmount: roundedGrossAmount,
         tenant: req.user.tenantId
     });
 
     // Add invoice amount to customer balance
     await Customer.findByIdAndUpdate(
         value.customerId,
-        { $inc: { openingBalance: value.grossAmount } }
+        { $inc: { openingBalance: roundedGrossAmount } }
     );
 
     await SalesSeries.findByIdAndUpdate(
@@ -243,18 +245,20 @@ exports.updateInvoice = catchAsync(async (req, res, next) => {
     const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
     const expectedGrossAmount = calculatedTotal + (value.shippingAmount || 0);
 
-    if (Math.abs(expectedGrossAmount - value.grossAmount) > 0.01) {
+    if (Math.abs(expectedGrossAmount - value.grossAmount) > 1) {
         return next(new ApiError(400, `Gross amount mismatch. Expected: ${expectedGrossAmount.toFixed(2)}, Received: ${value.grossAmount}`));
     }
 
+    const roundedGrossAmount = Math.round(value.grossAmount);
+
     const updatedInvoice = await Invoice.findOneAndUpdate(
         { _id: req.params.id, tenant: req.user.tenantId },
-        value,
+        { ...value, grossAmount: roundedGrossAmount },
         { new: true, runValidators: true }
     );
 
     // Adjust customer balance: deduct old amount and add new amount
-    const balanceAdjustment = value.grossAmount - invoice.grossAmount;
+    const balanceAdjustment = roundedGrossAmount - invoice.grossAmount;
     await Customer.findByIdAndUpdate(
         value.customerId,
         { $inc: { openingBalance: balanceAdjustment } }

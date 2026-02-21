@@ -16,10 +16,6 @@ const invoiceItemSchema = new mongoose.Schema({
         required: true,
         min: 1
     },
-    rate: {
-        type: Number,
-        default: 0
-    },
     discountPercentage: {
         type: Number,
         default: 0,

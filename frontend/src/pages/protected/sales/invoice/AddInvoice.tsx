@@ -62,6 +62,7 @@ export default function AddInvoice() {
   const shippingAmount = useWatch({ control: form.control, name: "shippingAmount" });
   const customerId = useWatch({ control: form.control, name: "customerId" });
   const salesSeriesId = useWatch({ control: form.control, name: "salesSeriesId" });
+  const grossAmount = useWatch({ control: form.control, name: "grossAmount" });
 
   useEffect(() => {
     const fetchBaseData = async () => {
@@ -76,9 +77,15 @@ export default function AddInvoice() {
   }, []);
 
   useEffect(() => {
-    const total = calculateInvoiceTotal(items, shippingAmount);
-    form.setValue("grossAmount", Math.round(total * 100) / 100);
-  }, [items, shippingAmount, form]);
+    if (!baseData || !items) return;
+    const itemsWithTax = items.map((item, index) => ({
+      ...item,
+      tax: shouldShowTaxField() ? (item.tax || getCalculatedTax(index)) : 0
+    }));
+    const total = calculateInvoiceTotal(itemsWithTax, shippingAmount);
+    form.setValue("grossAmount", Math.round(total));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, shippingAmount, baseData, salesSeriesId, customerId]);
 
   const getCalculatedTax = (itemIndex: number) => {
     if (!baseData || !salesSeriesId) return 0;
@@ -122,7 +129,16 @@ export default function AddInvoice() {
 
   const onSubmit = async (data: Invoice) => {
     try {
-      await axios.post("/invoices", data);
+      const payload = {
+        ...data,
+        items: data.items.map(item => ({
+          itemId: item.itemId,
+          price: item.price,
+          quantity: item.quantity,
+          discountPercentage: item.discountPercentage
+        }))
+      };
+      await axios.post("/invoices", payload);
       navigate("/sales/invoice/list");
       form.reset();
     } catch (error) {
@@ -196,6 +212,24 @@ export default function AddInvoice() {
               )}
             />
             <Controller
+              name="shippingAddress"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="row-span-2">
+                  <FieldLabel htmlFor="shippingAddress">Shipping Address</FieldLabel>
+                  <textarea
+                    {...field}
+                    id="shippingAddress"
+                    placeholder="Enter shipping address"
+                    className="flex lg:min-h-30 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+            <Controller
               name="invoiceDate"
               control={form.control}
               render={({ field, fieldState }) => (
@@ -267,42 +301,18 @@ export default function AddInvoice() {
                 </Field>
               )}
             />
-            <Controller
-              name="shippingAmount"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="shippingAmount">Shipping Amount</FieldLabel>
-                  <Input 
-                    {...field} 
-                    id="shippingAmount" 
-                    type="number" 
-                    placeholder="0" 
-                    value={field.value ?? ''}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
+            </div>
           </div>
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Items</h3>
-              <Button type="button" variant="outline" size="sm" onClick={() => append({ itemId: "", description: "", quantity: 1, price: 0, discountPercentage: 0, tax: 0, finalPrice: 0 })}>
-                <Plus className="h-4 w-4" /> Add Item
-              </Button>
-            </div>
-
+          <div className="pt-1">
             <div>
               {fields.map((field, index) => {
-                const item = items[index];
+                const item = items?.[index];
+                if (!item) return null;
                 const autoTax = getCalculatedTax(index);
-                console.log(item,index)
+                const product = baseData.products.find(p => p._id === item.itemId);
                 const displayTax = shouldShowTaxField() ? (item.tax || autoTax) : 0;
-                const calc = item ? calculateItemTotal(item.price, item.quantity, item.discountPercentage, displayTax) : null;
+                const calc = calculateItemTotal(item.price || 0, item.quantity || 0, item.discountPercentage || 0, displayTax);
                 
                 return (
                   <Card key={field.id} className="p-4 mb-2">
@@ -337,13 +347,14 @@ export default function AddInvoice() {
                               </Field>
                             )}
                           />
-                          <Controller
-                            name={`items.${index}.description`}
+                            <Controller
+                            name={`items.${index}.price`}
                             control={form.control}
-                            render={({ field }) => (
-                              <Field>
-                                <FieldLabel>Description</FieldLabel>
-                                <Input {...field} placeholder="Optional" />
+                            render={({ field, fieldState }) => (
+                              <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel>Price</FieldLabel>
+                                <Input {...field} type="number" placeholder="0" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} aria-invalid={fieldState.invalid} />
+                                <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
                           />
@@ -358,13 +369,13 @@ export default function AddInvoice() {
                               </Field>
                             )}
                           />
-                          <Controller
-                            name={`items.${index}.price`}
+                           <Controller
+                            name={`items.${index}.description`}
                             control={form.control}
                             render={({ field, fieldState }) => (
-                              <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel>Price</FieldLabel>
-                                <Input {...field} type="number" placeholder="0" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} aria-invalid={fieldState.invalid} />
+                              <Field>
+                                <FieldLabel>Description</FieldLabel>
+                                <Input {...field} placeholder="Optional" />
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
@@ -372,40 +383,47 @@ export default function AddInvoice() {
                           <Controller
                             name={`items.${index}.discountPercentage`}
                             control={form.control}
-                            render={({ field }) => (
+                            render={({ field,fieldState }) => (
                               <Field>
                                 <FieldLabel>Discount %</FieldLabel>
                                 <Input {...field} type="number" placeholder="0" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
                           />
                           <div className="flex items-center justify-center">
-                            <Button type="button" variant="ghost" size="sm" className="w-full bg-red-100" onClick={() => remove(index)}>
-                              <Trash2 className="w-4 text-red-500" /> Remove
+                            <Button type="button" size="sm" className="w-full hover:bg-red-500 bg-destructive text-white" onClick={() => remove(index)}>
+                              <Trash2 className="w-4" /> Delete
                             </Button>
                           </div>
                         </div>
                       </div>
-                      <div className="rounded p-1 bg-gray-50 dark:bg-black border-1 flex flex-col justify-between">
+                      <div className="rounded-lg mt-3 lg:mt-0 p-2 bg-gray-50 dark:bg-black border flex flex-col justify-between">
                         <table className="w-full text-sm -mb-2">
                           <tbody>
-                            <tr className="border-b">
-                              <td className="text-gray-600 py-1">Subtotal</td>
-                              <td className="font-semibold text-right py-1">{calc?.subtotal.toFixed(2) || '0.00'}</td>
-                            </tr>
-                            <tr className="border-b">
-                              <td className="text-gray-600 py-1">After Discount</td>
-                              <td className="font-semibold text-right py-1">{calc?.afterDiscount.toFixed(2) || '0.00'}</td>
-                            </tr>
-                            {shouldShowTaxField() && displayTax > 0 && (
+                            {product?.hsnCode && (
                               <tr className="border-b">
-                                <td className="text-gray-600 py-1">Tax ({displayTax.toFixed(2)}%)</td>
-                                <td className="font-semibold text-right py-1">{((calc?.afterDiscount || 0) * displayTax / 100).toFixed(2)}</td>
+                                <td className="py-1">HSN</td>
+                                <td className="font-semibold text-right py-1">{product.hsnCode}</td>
                               </tr>
                             )}
                             <tr className="border-b">
-                              <td className="text-gray-600 py-1">Final Price</td>
-                              <td className="font-semibold text-right py-1">{calc?.finalPrice.toFixed(2) || '0.00'}</td>
+                              <td className="py-1">Subtotal</td>
+                              <td className="font-semibold text-right py-1">{calc.subtotal.toFixed(2)}</td>
+                            </tr>
+                            <tr className="border-b">
+                              <td className="py-1">After Discount</td>
+                              <td className="font-semibold text-right py-1">{calc.afterDiscount.toFixed(2)}</td>
+                            </tr>
+                            {shouldShowTaxField() && displayTax > 0 && (
+                              <tr className="border-b">
+                                <td className="py-1">Tax ({displayTax.toFixed(2)}%)</td>
+                                <td className="font-semibold text-right py-1">{((calc.afterDiscount || 0) * displayTax / 100).toFixed(2)}</td>
+                              </tr>
+                            )}
+                            <tr>
+                              <td className="py-1">Final Price</td>
+                              <td className="font-semibold text-right py-1">{calc.finalPrice.toFixed(2)}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -415,20 +433,85 @@ export default function AddInvoice() {
                 );
               })}
             </div>
+            <div className="items-center mb-6">
+              <Button 
+                type="button" 
+                className="bg-chart-2 hover:bg-chart-2/95" 
+                size="sm" 
+                onClick={async () => {
+                  const lastIndex = fields.length - 1;
+                  const isValid = await form.trigger([
+                    `items.${lastIndex}.itemId`,
+                    `items.${lastIndex}.price`,
+                    `items.${lastIndex}.quantity`
+                  ]);
+                  if (isValid) {
+                    append({ itemId: "", description: "", quantity: 1, price: 0, discountPercentage: 0, tax: 0, finalPrice: 0 });
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" /> Add Item
+              </Button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded border-1 bg-gray-50 dark:bg-black">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-600">Subtotal</p>
-              <p className="text-lg font-semibold">₹{items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</p>
+            <Controller
+              name="shippingAmount"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="shippingAmount">Shipping Amount</FieldLabel>
+                  <Input 
+                    {...field} 
+                    id="shippingAmount" 
+                    type="number" 
+                    placeholder="0" 
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+            <Field>
+              <FieldLabel htmlFor="roundOff">Round Off</FieldLabel>
+              <Input
+                id="roundOff"
+                type="text"
+                value={((grossAmount || 0) - Math.round(grossAmount || 0)).toFixed(2)}
+                readOnly
+                className="bg-muted"
+              />
+            </Field>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Shipping</p>
-              <p className="text-lg font-semibold">₹{(shippingAmount || 0).toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total</p>
-              <p className="text-lg font-semibold">₹{(form.getValues("grossAmount") || 0).toFixed(2)}</p>
+            <div className="rounded-lg p-3 border bg-gray-50 dark:bg-black">
+              <table className="w-full">
+                <tbody>
+                  <tr className="border-b">
+                    <td className="text-sm py-2">Subtotal</td>
+                    <td className="text-sm font-semibold text-right">₹{(items || []).reduce((sum, item) => sum + ((item?.price || 0) * (item?.quantity || 0)), 0).toFixed(2)}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="text-sm py-2">Discount</td>
+                    <td className="text-sm font-semibold text-right">₹{(items || []).reduce((sum, item) => {
+                      if (!item) return sum;
+                      const subtotal = (item.price || 0) * (item.quantity || 0);
+                      return sum + (subtotal * (item.discountPercentage || 0) / 100);
+                    }, 0).toFixed(2)}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="text-sm py-2">Shipping</td>
+                    <td className="text-sm font-semibold text-right">{(shippingAmount || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-sm py-2">Total</td>
+                    <td className="text-sm font-semibold text-right">₹{(grossAmount || 0).toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
