@@ -104,7 +104,11 @@ export default function AddInvoice() {
         return product.tax1Rate || 0;
       }
     } else if (taxConfig.taxType === 'Service') {
-      return (product.tax1Rate || 0) + (product.tax2Rate || 0) + (product.tax3Rate || 0);
+      let total = 0;
+      if (taxConfig.tax1) total += product.tax1Rate || taxConfig.tax1.taxRate || 0;
+      if (taxConfig.tax2) total += product.tax2Rate || taxConfig.tax2.taxRate || 0;
+      if (taxConfig.tax3) total += product.tax3Rate || taxConfig.tax3.taxRate || 0;
+      return total;
     }
     
     return 0;
@@ -296,6 +300,7 @@ export default function AddInvoice() {
               {fields.map((field, index) => {
                 const item = items[index];
                 const autoTax = getCalculatedTax(index);
+                console.log(item,index)
                 const displayTax = shouldShowTaxField() ? (item.tax || autoTax) : 0;
                 const calc = item ? calculateItemTotal(item.price, item.quantity, item.discountPercentage, displayTax) : null;
                 
@@ -303,14 +308,20 @@ export default function AddInvoice() {
                   <Card key={field.id} className="p-4 mb-2">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-1">
                       <div className="md:col-span-3">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-0">
                           <Controller
                             name={`items.${index}.itemId`}
                             control={form.control}
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel>Item</FieldLabel>
-                                <Select value={field.value} onValueChange={field.onChange}>
+                                <Select value={field.value} onValueChange={(value) => {
+                                  field.onChange(value);
+                                  const product = baseData.products.find(p => p._id === value);
+                                  if (product) {
+                                    form.setValue(`items.${index}.price`, product.price || 0);
+                                  }
+                                }}>
                                   <SelectTrigger aria-invalid={fieldState.invalid}>
                                     <SelectValue placeholder="Select Product" />
                                   </SelectTrigger>
@@ -368,18 +379,11 @@ export default function AddInvoice() {
                               </Field>
                             )}
                           />
-                          {shouldShowTaxField() && (
-                            <Controller
-                              name={`items.${index}.tax`}
-                              control={form.control}
-                              render={({ field }) => (
-                                <Field>
-                                  <FieldLabel>Tax % (Auto: {autoTax.toFixed(2)}%)</FieldLabel>
-                                  <Input {...field} type="number" placeholder={autoTax.toString()} value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} />
-                                </Field>
-                              )}
-                            />
-                          )}
+                          <div className="flex items-center justify-center">
+                            <Button type="button" variant="ghost" size="sm" className="w-full bg-red-100" onClick={() => remove(index)}>
+                              <Trash2 className="w-4 text-red-500" /> Remove
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       <div className="rounded p-1 bg-gray-50 dark:bg-black border-1 flex flex-col justify-between">
@@ -393,15 +397,18 @@ export default function AddInvoice() {
                               <td className="text-gray-600 py-1">After Discount</td>
                               <td className="font-semibold text-right py-1">{calc?.afterDiscount.toFixed(2) || '0.00'}</td>
                             </tr>
+                            {shouldShowTaxField() && displayTax > 0 && (
+                              <tr className="border-b">
+                                <td className="text-gray-600 py-1">Tax ({displayTax.toFixed(2)}%)</td>
+                                <td className="font-semibold text-right py-1">{((calc?.afterDiscount || 0) * displayTax / 100).toFixed(2)}</td>
+                              </tr>
+                            )}
                             <tr className="border-b">
                               <td className="text-gray-600 py-1">Final Price</td>
                               <td className="font-semibold text-right py-1">{calc?.finalPrice.toFixed(2) || '0.00'}</td>
                             </tr>
                           </tbody>
                         </table>
-                        <Button type="button" variant="ghost" size="sm" className="w-full bg-red-100" onClick={() => remove(index)}>
-                          <Trash2 className="w-4 text-red-500" /> Remove
-                        </Button>
                       </div>
                     </div>
                   </Card>
