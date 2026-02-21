@@ -36,6 +36,27 @@ export const protectedRoute: AppRoute[] = [
     icon: "ShoppingCart",
     name: "sales",
     children: [
+        {
+        title: "Add Invoice",
+        name: "sales.invoice.add",
+        icon: "Plus",
+        path: "/sales/invoice/add",
+        element: lazy(() => import("@/pages/protected/sales/invoice/AddInvoice")),
+      },
+       {
+        title: "Invoice List",
+        name: "sales.invoice.list",
+        icon: "FileText",
+        path: "/sales/invoice/list",
+        element: lazy(() => import("@/pages/protected/sales/invoice/InvoiceList")),
+      },
+       {
+        title: "Edit Invoice",
+        name: "sales.invoice.edit",
+        path: "/sales/invoice/edit/:id",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/sales/invoice/EditInvoice")),
+      },
       {
         title: "Series List",
         name: "sales.series.list",

@@ -181,6 +181,17 @@ exports.updateCustomer = catchAsync(async (req, res, next) => {
 exports.deleteCustomer = catchAsync(async (req, res, next) => {
     const Payment = require('../models/Payment.model');
     const Receipt = require('../models/Receipt.model');
+    const Invoice = require('../models/Invoice.model');
+    
+    // Check if customer has any invoices
+    const invoiceCount = await Invoice.countDocuments({
+        customerId: req.params.id,
+        tenant: req.user.tenantId
+    });
+
+    if (invoiceCount > 0) {
+        return next(new ApiError(400, 'Cannot delete customer with existing invoices'));
+    }
     
     const customer = await Customer.findOneAndDelete({
         _id: req.params.id,

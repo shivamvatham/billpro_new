@@ -33,6 +33,7 @@ const EditUsers = lazy(() => import('../components/EditUser'))
 const UseReducer = lazy(() => import('../components/UseReducer'))
 const UseApi = lazy(() => import('../components/UseApi'))
 const RTK = lazy(() => import('../components/RTK'))
+const UseLocalStorageHook = lazy(() => import('../components/UseLocalStorageHook'))
 
 const NotFound = lazy(() => import('../components/NotFound'))
 
@@ -66,6 +67,7 @@ export const routes = [
   { path: '/use-reducer', element: UseReducer, title: 'Use Reducer' },
   { path: '/use-api', element: UseApi, title: 'Use Api' },
   { path: '/rtk', element: RTK, title: 'RTK' },
+  { path: '/localstoragehook', element: UseLocalStorageHook, title: 'Use Local Storage Hook' },
   // nested route with layout wrapper
   {
     path: '/management',
@@ -88,8 +90,8 @@ export const routes = [
   // { path: '/edituser/:id', element: EditUsers, title: 'Edit User' , hidden: true},
 
   // optional segment route
-  { path: '/edituser/:id?', element: EditUsers, title: 'Edit User' , hidden: true},
+  { path: '/edituser/:id?', element: EditUsers, title: 'Edit User', hidden: true },
 
-  { path: '/*', element: NotFound, title: 'Edit User' , hidden: true},
+  { path: '/*', element: NotFound, title: 'Edit User', hidden: true },
 
 ]

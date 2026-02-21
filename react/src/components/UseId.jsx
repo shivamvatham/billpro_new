@@ -19,7 +19,7 @@ function UserForm() {
     console.log(nameId)
     return (
         <>
-            <label htmlFor={nameId}>Enter Name:</label><br/>
+            <label htmlFor={nameId}>Enter Name:</label><br />
             <input type="text" id={nameId} placeholder="Enter Name" />
         </>
     )
