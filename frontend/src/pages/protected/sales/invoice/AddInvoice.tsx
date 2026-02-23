@@ -22,14 +22,49 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { calculateItemTotal, calculateInvoiceTotal } from "@/helpers/invoiceCalculations";
+import { calculateItemTotal, calculateInvoiceTotal, calculateGSTRate, calculateTaxBreakdown, calculateItemTaxDetails } from "@/helpers/invoiceCalculations";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
+interface Customer {
+  _id: string;
+  name: string;
+  gstNumber?: string;
+}
+
+interface InvoiceSeries {
+  _id: string;
+  invoiceSeriesName: string;
+  invoiceSeriesPrefix?: string;
+  invoiceSeriesStartingNumber: number;
+  invoiceTaxable: boolean;
+  default?: boolean;
+}
+
+interface Product {
+  _id: string;
+  productName: string;
+  price: number;
+  hsnCode?: string;
+  productTax?: {
+    tax1Rate?: number;
+    tax2Rate?: number;
+    tax3Rate?: number;
+  };
+}
+
+interface TaxConfig {
+  taxType: string;
+  tax1?: { taxRate?: number; taxName?: string };
+  tax2?: { taxRate?: number; taxName?: string };
+  tax3?: { taxRate?: number; taxName?: string };
+}
+
 interface BaseData {
-  customers: any[];
-  invoiceSeries: any[];
-  products: any[];
-  taxConfigs: any[];
+  customers: Customer[];
+  invoiceSeries: InvoiceSeries[];
+  products: Product[];
+  taxConfigs: TaxConfig[];
+  companyDetails?: { gstNumber?: string };
 }
 
 export default function AddInvoice() {
@@ -71,7 +106,7 @@ export default function AddInvoice() {
         const response = await axios.get("/invoices/getBaseData");
         setBaseData(response.data);
         
-        const defaultSeries = response.data.invoiceSeries.find((s: any) => s.default === true);
+        const defaultSeries = response.data.invoiceSeries.find((s: InvoiceSeries) => s.default === true);
         if (defaultSeries) {
           form.setValue("salesSeriesId", defaultSeries._id);
           form.setValue("invoiceNumber", defaultSeries.invoiceSeriesStartingNumber);
@@ -89,7 +124,7 @@ export default function AddInvoice() {
     const itemsWithTax = items.map((item, index) => ({
       ...item,
       tax: shouldShowTaxField() ? (item.tax || getCalculatedTax(index)) : 0
-    }));
+    })) as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number }[];
     const total = calculateInvoiceTotal(itemsWithTax, shippingAmount);
     form.setValue("grossAmount", Math.round(total));
     const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
@@ -108,21 +143,9 @@ export default function AddInvoice() {
     if (!product) return 0;
 
     const taxConfig = baseData.taxConfigs[0];
-    if (!taxConfig || taxConfig.taxType === 'None') return 0;
-
-    if (taxConfig.taxType === 'GST') {
-      const customer = baseData.customers.find(c => c._id === customerId);
-      const isSameState = customer?.gstNumber && 
-        customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
-      
-      if (isSameState || !customer?.gstNumber) {
-        return (product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0) + (product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0);
-      } else {
-        return product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
-      }
-    }
+    const customer = baseData.customers.find(c => c._id === customerId);
     
-    return 0;
+    return calculateGSTRate(product, taxConfig, customer?.gstNumber, baseData.companyDetails?.gstNumber);
   };
 
   const shouldShowTaxField = () => {
@@ -135,38 +158,15 @@ export default function AddInvoice() {
     if (!shouldShowTaxField() || !baseData) return [];
     
     const taxConfig = baseData.taxConfigs[0];
-    if (!taxConfig) return [];
-    
     const customer = baseData.customers.find(c => c._id === customerId);
-    const isSameState = customer?.gstNumber && 
-      customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
     
-    const taxes: Record<string, number> = {};
-    
-    (items || []).forEach((item) => {
-      const product = baseData.products.find(p => p._id === item.itemId);
-      if (!product) return;
-      
-      const subtotal = (item.price || 0) * (item.quantity || 0);
-      const afterDiscount = subtotal - (subtotal * (item.discountPercentage || 0) / 100);
-      if (isSameState || !customer?.gstNumber) {
-        if (taxConfig.tax2?.taxName) {
-          const rate = product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0;
-          taxes[taxConfig.tax2.taxName] = (taxes[taxConfig.tax2.taxName] || 0) + (afterDiscount * rate) / 100;
-        }
-        if (taxConfig.tax3?.taxName) {
-          const rate = product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0;
-          taxes[taxConfig.tax3.taxName] = (taxes[taxConfig.tax3.taxName] || 0) + (afterDiscount * rate) / 100;
-        }
-      } else {
-        if (taxConfig.tax1?.taxName) {
-          const rate = product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
-          taxes[taxConfig.tax1.taxName] = (taxes[taxConfig.tax1.taxName] || 0) + (afterDiscount * rate) / 100;
-        }
-      }
-    });
-    
-    return Object.entries(taxes).map(([name, amount]) => ({ name, amount: amount as number }));
+    return calculateTaxBreakdown(
+      (items || []) as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number }[], 
+      baseData.products, 
+      taxConfig, 
+      customer?.gstNumber, 
+      baseData.companyDetails?.gstNumber
+    );
   };
 
   const onSubmit = async (data: Invoice) => {
@@ -175,43 +175,24 @@ export default function AddInvoice() {
         ...data,
         items: data.items.map((item) => {
           const product = baseData?.products.find(p => p._id === item.itemId);
-          const subtotal = (item.price || 0) * (item.quantity || 0);
-          const discountAmount = subtotal * (item.discountPercentage || 0) / 100;
-          const afterDiscount = subtotal - discountAmount;
-          
           const taxConfig = baseData?.taxConfigs[0];
           const customer = baseData?.customers.find(c => c._id === customerId);
-          const isSameState = customer?.gstNumber && 
-            customer.gstNumber.substring(0, 2) === (baseData?.customers[0]?.gstNumber?.substring(0, 2) || '');
           
-          let tax1 = { amount: 0, percentage: 0 };
-          let tax2 = { amount: 0, percentage: 0 };
-          let tax3 = { amount: 0, percentage: 0 };
-          
-          if (shouldShowTaxField() && product && taxConfig) {
-            if (isSameState || !customer?.gstNumber) {
-              const tax2Rate = product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0;
-              const tax3Rate = product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0;
-              tax2 = { amount: afterDiscount * tax2Rate / 100, percentage: tax2Rate };
-              tax3 = { amount: afterDiscount * tax3Rate / 100, percentage: tax3Rate };
-            } else {
-              const tax1Rate = product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
-              tax1 = { amount: afterDiscount * tax1Rate / 100, percentage: tax1Rate };
-            }
-          }
-          
-          const priceWithTax = afterDiscount + tax1.amount + tax2.amount + tax3.amount;
+          const taxDetails = calculateItemTaxDetails(
+            item as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number },
+            product,
+            taxConfig,
+            customer?.gstNumber,
+            baseData?.companyDetails?.gstNumber,
+            shouldShowTaxField()
+          );
           
           return {
             itemId: item.itemId,
             price: item.price,
             quantity: item.quantity,
             discountPercentage: item.discountPercentage,
-            discountAmount,
-            tax1,
-            tax2,
-            tax3,
-            priceWithTax
+            ...taxDetails
           };
         })
       };

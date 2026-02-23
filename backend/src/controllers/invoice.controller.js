@@ -107,10 +107,11 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     });
 
     if (products.length !== itemIds.length) {
-        return next(new ApiError(404, 'One or more products not found'));
+        return next(new ApiError(404, 'Same product added more than 1 time'));
     }
 
     const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
+    console.log(calculatedTotal)
     const expectedGrossAmount = Math.round(calculatedTotal + (value.shippingAmount || 0));
 
     if (Math.abs(expectedGrossAmount - value.grossAmount) > 1) {
