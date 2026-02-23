@@ -20,6 +20,10 @@ const accountSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    default: {
+      type: Boolean,
+      default: false,
+    },
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",

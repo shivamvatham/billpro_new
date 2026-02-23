@@ -258,6 +258,13 @@ export const protectedRoute: AppRoute[] = [
         hidden: true,
         element: lazy(() => import("@/pages/protected/settings/Portal")),
       },
+      {
+        title: "Default Settings",
+        name: "settings.defaults",
+        path: "/settings/defaults",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/settings/DefaultSettings")),
+      },
     ],
   },
 ];

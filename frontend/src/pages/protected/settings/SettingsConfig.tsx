@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Settings2 } from "lucide-react"
+import { Building2, Settings2, Sliders } from "lucide-react"
 import { useNavigate, useLocation, Outlet } from "react-router"
 import { useEffect } from "react"
 
@@ -24,6 +24,10 @@ export default function SettingsConfig() {
         <TabsTrigger value="portal">
           <Building2 />
           Portal Settings
+        </TabsTrigger>
+        <TabsTrigger value="defaults">
+          <Sliders />
+          Default Settings
         </TabsTrigger>
       </TabsList>
       <Outlet />

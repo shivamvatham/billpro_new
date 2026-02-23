@@ -35,6 +35,10 @@ const salesSeriesSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    default: {
+        type: Boolean,
+        default: false,
+    },
     tenant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tenant',

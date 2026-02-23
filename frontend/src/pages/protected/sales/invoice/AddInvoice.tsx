@@ -106,9 +106,9 @@ export default function AddInvoice() {
         customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
       
       if (isSameState) {
-        return (product.tax2Rate || 0) + (product.tax3Rate || 0);
+        return (product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0) + (product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0);
       } else {
-        return product.tax1Rate || 0;
+        return product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
       }
     }
     
@@ -139,17 +139,19 @@ export default function AddInvoice() {
       
       const subtotal = (item.price || 0) * (item.quantity || 0);
       const afterDiscount = subtotal - (subtotal * (item.discountPercentage || 0) / 100);
-      
-      if (isSameState) {
+      if (isSameState || !customer?.gstNumber) {
         if (taxConfig.tax2?.taxName) {
-          taxes[taxConfig.tax2.taxName] = (taxes[taxConfig.tax2.taxName] || 0) + (afterDiscount * (product.tax2Rate || 0)) / 100;
+          const rate = product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0;
+          taxes[taxConfig.tax2.taxName] = (taxes[taxConfig.tax2.taxName] || 0) + (afterDiscount * rate) / 100;
         }
         if (taxConfig.tax3?.taxName) {
-          taxes[taxConfig.tax3.taxName] = (taxes[taxConfig.tax3.taxName] || 0) + (afterDiscount * (product.tax3Rate || 0)) / 100;
+          const rate = product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0;
+          taxes[taxConfig.tax3.taxName] = (taxes[taxConfig.tax3.taxName] || 0) + (afterDiscount * rate) / 100;
         }
       } else {
         if (taxConfig.tax1?.taxName) {
-          taxes[taxConfig.tax1.taxName] = (taxes[taxConfig.tax1.taxName] || 0) + (afterDiscount * (product.tax1Rate || 0)) / 100;
+          const rate = product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
+          taxes[taxConfig.tax1.taxName] = (taxes[taxConfig.tax1.taxName] || 0) + (afterDiscount * rate) / 100;
         }
       }
     });

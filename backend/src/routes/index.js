@@ -13,6 +13,7 @@ const paymentRoutes = require('./payment.routes');
 const receiptRoutes = require('./receipt.routes');
 const salesSeriesRoutes = require('./salesSeries.routes');
 const invoiceRoutes = require('./invoice.routes');
+const defaultSettingsRoutes = require('./defaultSettings.routes');
 
 const router = express.Router();
 
@@ -37,5 +38,6 @@ router.use('/payments', paymentRoutes);
 router.use('/receipts', receiptRoutes);
 router.use('/salesseries', salesSeriesRoutes);
 router.use('/invoices', invoiceRoutes);
+router.use('/settings/defaults', defaultSettingsRoutes);
 
 module.exports = router;
