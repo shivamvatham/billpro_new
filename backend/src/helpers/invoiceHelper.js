@@ -7,7 +7,7 @@ const calculateTaxRate = (product, taxConfig, customer, companyDetails, isTaxabl
         const isSameState = customer.gstNumber && companyDetails?.gstNumber && 
                             customer.gstNumber.substring(0, 2) === companyDetails.gstNumber.substring(0, 2);
         
-        if (isSameState) {
+        if (isSameState || !customer.gstNumber) {
             return (product?.productTax?.tax2Rate || taxConfig.tax2?.taxRate || 0) + 
                    (product?.productTax?.tax3Rate || taxConfig.tax3?.taxRate || 0);
         } else {
@@ -35,7 +35,7 @@ const calculateInvoiceTotal = (items, products, salesSeries, taxConfig, customer
     return items.reduce((total, item) => {
         const product = productMap.get(item.itemId);
         const itemTotal = item.price * item.quantity;
-        const discount = (itemTotal * item.discountPercentage) / 100;
+        const discount = (itemTotal * (item.discountPercentage || 0)) / 100;
         let itemAmount = itemTotal - discount;
         
         const taxRate = calculateTaxRate(product, taxConfig, customer, companyDetails, salesSeries.invoiceTaxable);

@@ -21,6 +21,28 @@ const invoiceItemSchema = new mongoose.Schema({
         default: 0,
         min: 0,
         max: 100
+    },
+    discountAmount: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    tax1: {
+        amount: { type: Number, default: 0, min: 0 },
+        percentage: { type: Number, default: 0, min: 0 }
+    },
+    tax2: {
+        amount: { type: Number, default: 0, min: 0 },
+        percentage: { type: Number, default: 0, min: 0 }
+    },
+    tax3: {
+        amount: { type: Number, default: 0, min: 0 },
+        percentage: { type: Number, default: 0, min: 0 }
+    },
+    priceWithTax: {
+        type: Number,
+        default: 0,
+        min: 0
     }
 }, { _id: false });
 

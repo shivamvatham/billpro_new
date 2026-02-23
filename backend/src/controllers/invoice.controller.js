@@ -46,7 +46,21 @@ const invoiceSchema = Joi.object({
                 'number.min': 'Quantity must be at least 1',
                 'any.required': 'Quantity is required'
             }),
-            discountPercentage: Joi.number().min(0).max(100).default(0)
+            discountPercentage: Joi.number().min(0).max(100).default(0),
+            discountAmount: Joi.number().min(0).default(0),
+            tax1: Joi.object({
+                amount: Joi.number().min(0).default(0),
+                percentage: Joi.number().min(0).default(0)
+            }).default({ amount: 0, percentage: 0 }),
+            tax2: Joi.object({
+                amount: Joi.number().min(0).default(0),
+                percentage: Joi.number().min(0).default(0)
+            }).default({ amount: 0, percentage: 0 }),
+            tax3: Joi.object({
+                amount: Joi.number().min(0).default(0),
+                percentage: Joi.number().min(0).default(0)
+            }).default({ amount: 0, percentage: 0 }),
+            priceWithTax: Joi.number().min(0).default(0)
         })
     ).min(1).required().messages({
         'array.min': 'Invoice must have at least one item',
@@ -97,7 +111,7 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     }
 
     const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
-    const expectedGrossAmount = calculatedTotal + (value.shippingAmount || 0);
+    const expectedGrossAmount = Math.round(calculatedTotal + (value.shippingAmount || 0));
 
     if (Math.abs(expectedGrossAmount - value.grossAmount) > 1) {
         return next(new ApiError(400, `Gross amount mismatch. Expected: ${expectedGrossAmount.toFixed(2)}, Received: ${value.grossAmount}`));
@@ -144,7 +158,7 @@ exports.getInvoiceBaseData = catchAsync(async (req, res) => {
       ...rest,
       tax1Rate: productTax?.tax1Rate ?? null,
       tax2Rate: productTax?.tax2Rate ?? null,
-      tax3Rate: productTax?.tax2Rate ?? null,
+      tax3Rate: productTax?.tax3Rate ?? null,
     };
   });
 

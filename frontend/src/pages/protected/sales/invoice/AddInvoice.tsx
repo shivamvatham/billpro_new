@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { calculateItemTotal, calculateInvoiceTotal } from "@/helpers/invoiceCalculations";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 interface BaseData {
   customers: any[];
@@ -73,6 +74,7 @@ export default function AddInvoice() {
         const defaultSeries = response.data.invoiceSeries.find((s: any) => s.default === true);
         if (defaultSeries) {
           form.setValue("salesSeriesId", defaultSeries._id);
+          form.setValue("invoiceNumber", defaultSeries.invoiceSeriesStartingNumber);
         }
       } catch (error) {
         console.log("error", error);
@@ -90,6 +92,8 @@ export default function AddInvoice() {
     }));
     const total = calculateInvoiceTotal(itemsWithTax, shippingAmount);
     form.setValue("grossAmount", Math.round(total));
+    const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
+    form.setValue("invoiceNumber", series?.invoiceSeriesStartingNumber.toString() || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, shippingAmount, baseData, salesSeriesId, customerId]);
 
@@ -111,7 +115,7 @@ export default function AddInvoice() {
       const isSameState = customer?.gstNumber && 
         customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
       
-      if (isSameState) {
+      if (isSameState || !customer?.gstNumber) {
         return (product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0) + (product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0);
       } else {
         return product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
@@ -169,12 +173,47 @@ export default function AddInvoice() {
     try {
       const payload = {
         ...data,
-        items: data.items.map(item => ({
-          itemId: item.itemId,
-          price: item.price,
-          quantity: item.quantity,
-          discountPercentage: item.discountPercentage
-        }))
+        items: data.items.map((item) => {
+          const product = baseData?.products.find(p => p._id === item.itemId);
+          const subtotal = (item.price || 0) * (item.quantity || 0);
+          const discountAmount = subtotal * (item.discountPercentage || 0) / 100;
+          const afterDiscount = subtotal - discountAmount;
+          
+          const taxConfig = baseData?.taxConfigs[0];
+          const customer = baseData?.customers.find(c => c._id === customerId);
+          const isSameState = customer?.gstNumber && 
+            customer.gstNumber.substring(0, 2) === (baseData?.customers[0]?.gstNumber?.substring(0, 2) || '');
+          
+          let tax1 = { amount: 0, percentage: 0 };
+          let tax2 = { amount: 0, percentage: 0 };
+          let tax3 = { amount: 0, percentage: 0 };
+          
+          if (shouldShowTaxField() && product && taxConfig) {
+            if (isSameState || !customer?.gstNumber) {
+              const tax2Rate = product.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0;
+              const tax3Rate = product.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0;
+              tax2 = { amount: afterDiscount * tax2Rate / 100, percentage: tax2Rate };
+              tax3 = { amount: afterDiscount * tax3Rate / 100, percentage: tax3Rate };
+            } else {
+              const tax1Rate = product.tax1Rate ?? taxConfig.tax1?.taxRate ?? 0;
+              tax1 = { amount: afterDiscount * tax1Rate / 100, percentage: tax1Rate };
+            }
+          }
+          
+          const priceWithTax = afterDiscount + tax1.amount + tax2.amount + tax3.amount;
+          
+          return {
+            itemId: item.itemId,
+            price: item.price,
+            quantity: item.quantity,
+            discountPercentage: item.discountPercentage,
+            discountAmount,
+            tax1,
+            tax2,
+            tax3,
+            priceWithTax
+          };
+        })
       };
       await axios.post("/invoices", payload);
       navigate("/sales/invoice/list");
@@ -241,13 +280,24 @@ export default function AddInvoice() {
             <Controller
               name="invoiceNumber"
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="invoiceNumber">Invoice Number</FieldLabel>
-                  <Input {...field} id="invoiceNumber" placeholder="Enter invoice number" aria-invalid={fieldState.invalid} />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
+              render={({ field, fieldState }) => {
+                const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
+                const prefix = series?.invoiceSeriesPrefix;
+                return (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="invoiceNumber">Invoice Number</FieldLabel>
+                    {prefix ? (
+                      <InputGroup>
+                        <InputGroupAddon>{prefix}</InputGroupAddon>
+                        <InputGroupInput {...field} id="invoiceNumber" placeholder="Enter invoice number" aria-invalid={fieldState.invalid} />
+                      </InputGroup>
+                    ) : (
+                      <Input {...field} id="invoiceNumber" placeholder="Enter invoice number" aria-invalid={fieldState.invalid} />
+                    )}
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                );
+              }}
             />
             <Controller
               name="shippingAddress"
