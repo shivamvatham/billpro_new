@@ -122,15 +122,18 @@ export default function AddInvoice() {
   };
 
   const getTaxBreakdown = () => {
-    if (!shouldShowTaxField() || !baseData) return { cgst: 0, sgst: 0, igst: 0 };
+    if (!shouldShowTaxField() || !baseData) return [];
+    
+    const taxConfig = baseData.taxConfigs[0];
+    if (!taxConfig) return [];
     
     const customer = baseData.customers.find(c => c._id === customerId);
     const isSameState = customer?.gstNumber && 
       customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
     
-    let cgst = 0, sgst = 0, igst = 0;
+    const taxes: Record<string, number> = {};
     
-    (items || []).forEach((item, index) => {
+    (items || []).forEach((item) => {
       const product = baseData.products.find(p => p._id === item.itemId);
       if (!product) return;
       
@@ -138,16 +141,20 @@ export default function AddInvoice() {
       const afterDiscount = subtotal - (subtotal * (item.discountPercentage || 0) / 100);
       
       if (isSameState) {
-        const tax2 = product.tax2Rate || 0;
-        const tax3 = product.tax3Rate || 0;
-        cgst += (afterDiscount * tax2) / 100;
-        sgst += (afterDiscount * tax3) / 100;
+        if (taxConfig.tax2?.taxName) {
+          taxes[taxConfig.tax2.taxName] = (taxes[taxConfig.tax2.taxName] || 0) + (afterDiscount * (product.tax2Rate || 0)) / 100;
+        }
+        if (taxConfig.tax3?.taxName) {
+          taxes[taxConfig.tax3.taxName] = (taxes[taxConfig.tax3.taxName] || 0) + (afterDiscount * (product.tax3Rate || 0)) / 100;
+        }
       } else {
-        igst += (afterDiscount * (product.tax1Rate || 0)) / 100;
+        if (taxConfig.tax1?.taxName) {
+          taxes[taxConfig.tax1.taxName] = (taxes[taxConfig.tax1.taxName] || 0) + (afterDiscount * (product.tax1Rate || 0)) / 100;
+        }
       }
     });
     
-    return { cgst, sgst, igst };
+    return Object.entries(taxes).map(([name, amount]) => ({ name, amount: amount as number }));
   };
 
   const onSubmit = async (data: Invoice) => {
@@ -525,31 +532,12 @@ export default function AddInvoice() {
                       return sum + (subtotal * (item.discountPercentage || 0) / 100);
                     }, 0).toFixed(2)}</td>
                   </tr>
-                  {shouldShowTaxField() && (() => {
-                    const { cgst, sgst, igst } = getTaxBreakdown();
-                    return (
-                      <>
-                        {cgst > 0 && (
-                          <tr className="border-b">
-                            <td className="text-sm py-2">CGST</td>
-                            <td className="text-sm font-semibold text-right">₹{cgst.toFixed(2)}</td>
-                          </tr>
-                        )}
-                        {sgst > 0 && (
-                          <tr className="border-b">
-                            <td className="text-sm py-2">SGST</td>
-                            <td className="text-sm font-semibold text-right">₹{sgst.toFixed(2)}</td>
-                          </tr>
-                        )}
-                        {igst > 0 && (
-                          <tr className="border-b">
-                            <td className="text-sm py-2">IGST</td>
-                            <td className="text-sm font-semibold text-right">₹{igst.toFixed(2)}</td>
-                          </tr>
-                        )}
-                      </>
-                    );
-                  })()}
+                  {shouldShowTaxField() && getTaxBreakdown().map((tax) => (
+                    <tr key={tax.name} className="border-b">
+                      <td className="text-sm py-2">{tax.name}</td>
+                      <td className="text-sm font-semibold text-right">₹{tax.amount.toFixed(2)}</td>
+                    </tr>
+                  ))}
                   <tr className="border-b">
                     <td className="text-sm py-2">Shipping</td>
                     <td className="text-sm font-semibold text-right">₹{(shippingAmount || 0).toFixed(2)}</td>
