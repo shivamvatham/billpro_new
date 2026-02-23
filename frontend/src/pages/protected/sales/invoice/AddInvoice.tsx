@@ -69,11 +69,17 @@ export default function AddInvoice() {
       try {
         const response = await axios.get("/invoices/getBaseData");
         setBaseData(response.data);
+        
+        const defaultSeries = response.data.invoiceSeries.find((s: any) => s.default === true);
+        if (defaultSeries) {
+          form.setValue("salesSeriesId", defaultSeries._id);
+        }
       } catch (error) {
         console.log("error", error);
       }
     };
     fetchBaseData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
