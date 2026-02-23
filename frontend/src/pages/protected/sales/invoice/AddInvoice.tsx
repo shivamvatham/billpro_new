@@ -19,16 +19,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { calculateItemTotal, calculateInvoiceTotal, calculateGSTRate, calculateTaxBreakdown, calculateItemTaxDetails } from "@/helpers/invoiceCalculations";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import {
+  calculateItemTotal,
+  calculateInvoiceTotal,
+  calculateGSTRate,
+  calculateTaxBreakdown,
+  calculateItemTaxDetails,
+} from "@/helpers/invoiceCalculations";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 interface Customer {
   _id: string;
   name: string;
   gstNumber?: string;
+  address?: string;
 }
 
 interface InvoiceSeries {
@@ -54,6 +69,7 @@ interface Product {
 
 interface TaxConfig {
   taxType: string;
+  taxNumber?: string;
   tax1?: { taxRate?: number; taxName?: string };
   tax2?: { taxRate?: number; taxName?: string };
   tax3?: { taxRate?: number; taxName?: string };
@@ -64,7 +80,6 @@ interface BaseData {
   invoiceSeries: InvoiceSeries[];
   products: Product[];
   taxConfigs: TaxConfig[];
-  companyDetails?: { gstNumber?: string };
 }
 
 export default function AddInvoice() {
@@ -72,6 +87,7 @@ export default function AddInvoice() {
   const [baseData, setBaseData] = useState<BaseData | null>(null);
   const [invoiceDateOpen, setInvoiceDateOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [unroundedTotal, setUnroundedTotal] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(invoiceSchema),
@@ -85,19 +101,35 @@ export default function AddInvoice() {
       grossAmount: 0,
       invoiceDate: new Date(),
       dueDate: new Date(),
-      items: [{ itemId: "", description: "", quantity: 1, price: 0, discountPercentage: 0, tax: 0, finalPrice: 0 }]
-    }
+      items: [
+        {
+          itemId: "",
+          description: "",
+          quantity: 1,
+          price: 0,
+          discountPercentage: 0,
+          tax: 0,
+          finalPrice: 0,
+        },
+      ],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "items"
+    name: "items",
   });
 
   const items = useWatch({ control: form.control, name: "items" });
-  const shippingAmount = useWatch({ control: form.control, name: "shippingAmount" });
+  const shippingAmount = useWatch({
+    control: form.control,
+    name: "shippingAmount",
+  });
   const customerId = useWatch({ control: form.control, name: "customerId" });
-  const salesSeriesId = useWatch({ control: form.control, name: "salesSeriesId" });
+  const salesSeriesId = useWatch({
+    control: form.control,
+    name: "salesSeriesId",
+  });
   const grossAmount = useWatch({ control: form.control, name: "grossAmount" });
 
   useEffect(() => {
@@ -105,11 +137,16 @@ export default function AddInvoice() {
       try {
         const response = await axios.get("/invoices/getBaseData");
         setBaseData(response.data);
-        
-        const defaultSeries = response.data.invoiceSeries.find((s: InvoiceSeries) => s.default === true);
+
+        const defaultSeries = response.data.invoiceSeries.find(
+          (s: InvoiceSeries) => s.default === true
+        );
         if (defaultSeries) {
           form.setValue("salesSeriesId", defaultSeries._id);
-          form.setValue("invoiceNumber", defaultSeries.invoiceSeriesStartingNumber);
+          form.setValue(
+            "invoiceNumber",
+            defaultSeries.invoiceSeriesStartingNumber
+          );
         }
       } catch (error) {
         console.log("error", error);
@@ -121,80 +158,123 @@ export default function AddInvoice() {
 
   useEffect(() => {
     if (!baseData || !items) return;
+
+    const customer = baseData.customers.find((c) => c._id === customerId);
+    form.setValue("shippingAddress", customer?.address || '');
     const itemsWithTax = items.map((item, index) => ({
       ...item,
-      tax: shouldShowTaxField() ? (item.tax || getCalculatedTax(index)) : 0
-    })) as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number }[];
+      tax: shouldShowTaxField() ? item.tax || getCalculatedTax(index) : 0,
+    })) as unknown as {
+      itemId: string;
+      price: number;
+      quantity: number;
+      discountPercentage: number;
+      tax: number;
+    }[];
     const total = calculateInvoiceTotal(itemsWithTax, shippingAmount);
+    setUnroundedTotal(total);
     form.setValue("grossAmount", Math.round(total));
-    const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
-    form.setValue("invoiceNumber", series?.invoiceSeriesStartingNumber.toString() || "");
+    const series = baseData.invoiceSeries.find((s) => s._id === salesSeriesId);
+    form.setValue(
+      "invoiceNumber",
+      series?.invoiceSeriesStartingNumber.toString() || ""
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, shippingAmount, baseData, salesSeriesId, customerId]);
 
   const getCalculatedTax = (itemIndex: number) => {
     if (!baseData || !salesSeriesId) return 0;
-    
-    const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
+
+    const series = baseData.invoiceSeries.find((s) => s._id === salesSeriesId);
     if (!series?.invoiceTaxable) return 0;
 
     const item = items[itemIndex];
-    const product = baseData.products.find(p => p._id === item.itemId);
+    const product = baseData.products.find((p) => p._id === item.itemId);
     if (!product) return 0;
 
     const taxConfig = baseData.taxConfigs[0];
-    const customer = baseData.customers.find(c => c._id === customerId);
-    
-    return calculateGSTRate(product, taxConfig, customer?.gstNumber, baseData.companyDetails?.gstNumber);
+    const customer = baseData.customers.find((c) => c._id === customerId);
+
+    return calculateGSTRate(product, taxConfig, customer?.gstNumber);
   };
 
   const shouldShowTaxField = () => {
     if (!baseData || !salesSeriesId) return false;
-    const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
+    const series = baseData.invoiceSeries.find((s) => s._id === salesSeriesId);
     return series?.invoiceTaxable;
+  };
+
+  const validateTaxConfig = (seriesId: string) => {
+    const series = baseData?.invoiceSeries.find((s) => s._id === seriesId);
+    const taxConfig = baseData?.taxConfigs[0];
+    return (
+      series?.invoiceTaxable && (!taxConfig || taxConfig.taxType === "None")
+    );
   };
 
   const getTaxBreakdown = () => {
     if (!shouldShowTaxField() || !baseData) return [];
-    
+
     const taxConfig = baseData.taxConfigs[0];
-    const customer = baseData.customers.find(c => c._id === customerId);
-    
+    const customer = baseData.customers.find((c) => c._id === customerId);
+
+    console.log("my console", baseData);
+
     return calculateTaxBreakdown(
-      (items || []) as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number }[], 
-      baseData.products, 
-      taxConfig, 
-      customer?.gstNumber, 
-      baseData.companyDetails?.gstNumber
+      (items || []) as unknown as {
+        itemId: string;
+        price: number;
+        quantity: number;
+        discountPercentage: number;
+        tax: number;
+      }[],
+      baseData.products,
+      taxConfig,
+      customer?.gstNumber
     );
   };
 
   const onSubmit = async (data: Invoice) => {
+    if (validateTaxConfig(data.salesSeriesId)) {
+      form.setError("salesSeriesId", {
+        type: "manual",
+        message: "Tax configuration is required for taxable series",
+      });
+      return;
+    }
+
     try {
+      const taxConfig = baseData?.taxConfigs[0];
       const payload = {
         ...data,
         items: data.items.map((item) => {
-          const product = baseData?.products.find(p => p._id === item.itemId);
-          const taxConfig = baseData?.taxConfigs[0];
-          const customer = baseData?.customers.find(c => c._id === customerId);
-          
+          const product = baseData?.products.find((p) => p._id === item.itemId);
+          const customer = baseData?.customers.find(
+            (c) => c._id === customerId
+          );
+
           const taxDetails = calculateItemTaxDetails(
-            item as unknown as { itemId: string; price: number; quantity: number; discountPercentage: number; tax: number },
+            item as unknown as {
+              itemId: string;
+              price: number;
+              quantity: number;
+              discountPercentage: number;
+              tax: number;
+            },
             product,
             taxConfig,
             customer?.gstNumber,
-            baseData?.companyDetails?.gstNumber,
             shouldShowTaxField()
           );
-          
+
           return {
             itemId: item.itemId,
             price: item.price,
             quantity: item.quantity,
             discountPercentage: item.discountPercentage,
-            ...taxDetails
+            ...taxDetails,
           };
-        })
+        }),
       };
       await axios.post("/invoices", payload);
       navigate("/sales/invoice/list");
@@ -226,8 +306,10 @@ export default function AddInvoice() {
                     </SelectTrigger>
                     <SelectContent position="popper">
                       <SelectGroup>
-                        {baseData.customers.map(c => (
-                          <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                        {baseData.customers.map((c) => (
+                          <SelectItem key={c._id} value={c._id}>
+                            {c.name}
+                          </SelectItem>
                         ))}
                       </SelectGroup>
                     </SelectContent>
@@ -239,41 +321,69 @@ export default function AddInvoice() {
             <Controller
               name="salesSeriesId"
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Sales Series</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger aria-invalid={fieldState.invalid}>
-                      <SelectValue placeholder="Select Series" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectGroup>
-                        {baseData.invoiceSeries.map(s => (
-                          <SelectItem key={s._id} value={s._id}>{s.invoiceSeriesName}</SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
+              render={({ field, fieldState }) => {
+                const hasError = validateTaxConfig(field.value);
+
+                return (
+                  <Field data-invalid={fieldState.invalid || hasError}>
+                    <FieldLabel>Sales Series</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        aria-invalid={fieldState.invalid || hasError}
+                      >
+                        <SelectValue placeholder="Select Series" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          {baseData.invoiceSeries.map((s) => (
+                            <SelectItem key={s._id} value={s._id}>
+                              {s.invoiceSeriesName}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {hasError ? (
+                      <p className="text-xs -mt-3 text-destructive">
+                        Tax configuration is required for taxable series
+                      </p>
+                    ) : (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                );
+              }}
             />
             <Controller
               name="invoiceNumber"
               control={form.control}
               render={({ field, fieldState }) => {
-                const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
+                const series = baseData.invoiceSeries.find(
+                  (s) => s._id === salesSeriesId
+                );
                 const prefix = series?.invoiceSeriesPrefix;
                 return (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="invoiceNumber">Invoice Number</FieldLabel>
+                    <FieldLabel htmlFor="invoiceNumber">
+                      Invoice Number
+                    </FieldLabel>
                     {prefix ? (
                       <InputGroup>
                         <InputGroupAddon>{prefix}</InputGroupAddon>
-                        <InputGroupInput {...field} id="invoiceNumber" placeholder="Enter invoice number" aria-invalid={fieldState.invalid} />
+                        <InputGroupInput
+                          {...field}
+                          id="invoiceNumber"
+                          placeholder="Enter invoice number"
+                          aria-invalid={fieldState.invalid}
+                        />
                       </InputGroup>
                     ) : (
-                      <Input {...field} id="invoiceNumber" placeholder="Enter invoice number" aria-invalid={fieldState.invalid} />
+                      <Input
+                        {...field}
+                        id="invoiceNumber"
+                        placeholder="Enter invoice number"
+                        aria-invalid={fieldState.invalid}
+                      />
                     )}
                     <FieldError errors={[fieldState.error]} />
                   </Field>
@@ -285,7 +395,9 @@ export default function AddInvoice() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="row-span-2">
-                  <FieldLabel htmlFor="shippingAddress">Shipping Address</FieldLabel>
+                  <FieldLabel htmlFor="shippingAddress">
+                    Shipping Address
+                  </FieldLabel>
                   <textarea
                     {...field}
                     id="shippingAddress"
@@ -298,78 +410,89 @@ export default function AddInvoice() {
               )}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-            <Controller
-              name="invoiceDate"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Invoice Date</FieldLabel>
-                  <Popover open={invoiceDateOpen} onOpenChange={setInvoiceDateOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                        aria-invalid={fieldState.invalid}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => {
-                          field.onChange(date);
-                          setInvoiceDateOpen(false);
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-            <Controller
-              name="dueDate"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Due Date</FieldLabel>
-                  <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                        aria-invalid={fieldState.invalid}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => {
-                          field.onChange(date);
-                          setDueDateOpen(false);
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
+              <Controller
+                name="invoiceDate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Invoice Date</FieldLabel>
+                    <Popover
+                      open={invoiceDateOpen}
+                      onOpenChange={setInvoiceDateOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          aria-invalid={fieldState.invalid}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(new Date(field.value), "PPP")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setInvoiceDateOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="dueDate"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Due Date</FieldLabel>
+                    <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          aria-invalid={fieldState.invalid}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(new Date(field.value), "PPP")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setDueDateOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
             </div>
           </div>
 
@@ -379,10 +502,19 @@ export default function AddInvoice() {
                 const item = items?.[index];
                 if (!item) return null;
                 const autoTax = getCalculatedTax(index);
-                const product = baseData.products.find(p => p._id === item.itemId);
-                const displayTax = shouldShowTaxField() ? (item.tax || autoTax) : 0;
-                const calc = calculateItemTotal(item.price || 0, item.quantity || 0, item.discountPercentage || 0, displayTax);
-                
+                const product = baseData.products.find(
+                  (p) => p._id === item.itemId
+                );
+                const displayTax = shouldShowTaxField()
+                  ? item.tax || autoTax
+                  : 0;
+                const calc = calculateItemTotal(
+                  item.price || 0,
+                  item.quantity || 0,
+                  item.discountPercentage || 0,
+                  displayTax
+                );
+
                 return (
                   <Card key={field.id} className="p-4 mb-2">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-1">
@@ -394,20 +526,32 @@ export default function AddInvoice() {
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel>Item</FieldLabel>
-                                <Select value={field.value} onValueChange={(value) => {
-                                  field.onChange(value);
-                                  const product = baseData.products.find(p => p._id === value);
-                                  if (product) {
-                                    form.setValue(`items.${index}.price`, product.price || 0);
-                                  }
-                                }}>
-                                  <SelectTrigger aria-invalid={fieldState.invalid}>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={(value) => {
+                                    field.onChange(value);
+                                    const product = baseData.products.find(
+                                      (p) => p._id === value
+                                    );
+                                    if (product) {
+                                      form.setValue(
+                                        `items.${index}.price`,
+                                        product.price || 0
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger
+                                    aria-invalid={fieldState.invalid}
+                                  >
                                     <SelectValue placeholder="Select Product" />
                                   </SelectTrigger>
                                   <SelectContent position="popper">
                                     <SelectGroup>
-                                      {baseData.products.map(p => (
-                                        <SelectItem key={p._id} value={p._id}>{p.productName}</SelectItem>
+                                      {baseData.products.map((p) => (
+                                        <SelectItem key={p._id} value={p._id}>
+                                          {p.productName}
+                                        </SelectItem>
                                       ))}
                                     </SelectGroup>
                                   </SelectContent>
@@ -416,13 +560,22 @@ export default function AddInvoice() {
                               </Field>
                             )}
                           />
-                            <Controller
+                          <Controller
                             name={`items.${index}.price`}
                             control={form.control}
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel>Price</FieldLabel>
-                                <Input {...field} type="number" placeholder="0" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} aria-invalid={fieldState.invalid} />
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  placeholder="0"
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  aria-invalid={fieldState.invalid}
+                                />
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
@@ -433,12 +586,21 @@ export default function AddInvoice() {
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel>Quantity</FieldLabel>
-                                <Input {...field} type="number" placeholder="1" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} aria-invalid={fieldState.invalid} />
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  placeholder="1"
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                  aria-invalid={fieldState.invalid}
+                                />
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
                           />
-                           <Controller
+                          <Controller
                             name={`items.${index}.description`}
                             control={form.control}
                             render={({ field, fieldState }) => (
@@ -452,16 +614,29 @@ export default function AddInvoice() {
                           <Controller
                             name={`items.${index}.discountPercentage`}
                             control={form.control}
-                            render={({ field,fieldState }) => (
+                            render={({ field, fieldState }) => (
                               <Field>
                                 <FieldLabel>Discount %</FieldLabel>
-                                <Input {...field} type="number" placeholder="0" value={field.value ?? ''} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  placeholder="0"
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
+                                  }
+                                />
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
                           />
                           <div className="flex items-center justify-center">
-                            <Button type="button" size="sm" className="w-full hover:bg-red-500 bg-destructive text-white" onClick={() => remove(index)}>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="w-full hover:bg-red-500 bg-destructive text-white"
+                              onClick={() => remove(index)}
+                            >
                               <Trash2 className="w-4" /> Delete
                             </Button>
                           </div>
@@ -473,26 +648,41 @@ export default function AddInvoice() {
                             {product?.hsnCode && (
                               <tr className="border-b">
                                 <td className="py-1">HSN</td>
-                                <td className="font-semibold text-right py-1">{product.hsnCode}</td>
+                                <td className="font-semibold text-right py-1">
+                                  {product.hsnCode}
+                                </td>
                               </tr>
                             )}
                             <tr className="border-b">
                               <td className="py-1">Subtotal</td>
-                              <td className="font-semibold text-right py-1">{calc.subtotal.toFixed(2)}</td>
+                              <td className="font-semibold text-right py-1">
+                                {calc.subtotal.toFixed(2)}
+                              </td>
                             </tr>
                             <tr className="border-b">
                               <td className="py-1">After Discount</td>
-                              <td className="font-semibold text-right py-1">{calc.afterDiscount.toFixed(2)}</td>
+                              <td className="font-semibold text-right py-1">
+                                {calc.afterDiscount.toFixed(2)}
+                              </td>
                             </tr>
                             {shouldShowTaxField() && displayTax > 0 && (
                               <tr className="border-b">
-                                <td className="py-1">Tax ({displayTax.toFixed(2)}%)</td>
-                                <td className="font-semibold text-right py-1">{((calc.afterDiscount || 0) * displayTax / 100).toFixed(2)}</td>
+                                <td className="py-1">
+                                  Tax ({displayTax.toFixed(2)}%)
+                                </td>
+                                <td className="font-semibold text-right py-1">
+                                  {(
+                                    ((calc.afterDiscount || 0) * displayTax) /
+                                    100
+                                  ).toFixed(2)}
+                                </td>
                               </tr>
                             )}
                             <tr>
                               <td className="py-1">Final Price</td>
-                              <td className="font-semibold text-right py-1">{calc.finalPrice.toFixed(2)}</td>
+                              <td className="font-semibold text-right py-1">
+                                {calc.finalPrice.toFixed(2)}
+                              </td>
                             </tr>
                           </tbody>
                         </table>
@@ -503,19 +693,27 @@ export default function AddInvoice() {
               })}
             </div>
             <div className="items-center mb-6">
-              <Button 
-                type="button" 
-                className="bg-chart-2 hover:bg-chart-2/95" 
-                size="sm" 
+              <Button
+                type="button"
+                className="bg-chart-2 hover:bg-chart-2/95"
+                size="sm"
                 onClick={async () => {
                   const lastIndex = fields.length - 1;
                   const isValid = await form.trigger([
                     `items.${lastIndex}.itemId`,
                     `items.${lastIndex}.price`,
-                    `items.${lastIndex}.quantity`
+                    `items.${lastIndex}.quantity`,
                   ]);
                   if (isValid) {
-                    append({ itemId: "", description: "", quantity: 1, price: 0, discountPercentage: 0, tax: 0, finalPrice: 0 });
+                    append({
+                      itemId: "",
+                      description: "",
+                      quantity: 1,
+                      price: 0,
+                      discountPercentage: 0,
+                      tax: 0,
+                      finalPrice: 0,
+                    });
                   }
                 }}
               >
@@ -526,72 +724,107 @@ export default function AddInvoice() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-            <Controller
-              name="shippingAmount"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="shippingAmount">Shipping Amount</FieldLabel>
-                  <Input 
-                    {...field} 
-                    id="shippingAmount" 
-                    type="number" 
-                    placeholder="0" 
-                    value={field.value ?? ''}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-            <Field>
-              <FieldLabel htmlFor="roundOff">Round Off</FieldLabel>
-              <Input
-                id="roundOff"
-                type="text"
-                value={((grossAmount || 0) - Math.round(grossAmount || 0)).toFixed(2)}
-                readOnly
-                className="bg-muted"
+              <Controller
+                name="shippingAmount"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="shippingAmount">
+                      Shipping Amount
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="shippingAmount"
+                      type="number"
+                      placeholder="0"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
               />
-            </Field>
+              <Field>
+                <FieldLabel htmlFor="roundOff">Round Off</FieldLabel>
+                <Input
+                  id="roundOff"
+                  type="text"
+                  value={(unroundedTotal - Math.round(unroundedTotal)).toFixed(2)}
+                  readOnly
+                  className="bg-muted"
+                />
+              </Field>
             </div>
             <div className="rounded-lg p-3 border bg-gray-50 dark:bg-black">
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
                     <td className="text-sm py-2">Subtotal</td>
-                    <td className="text-sm font-semibold text-right">₹{(items || []).reduce((sum, item) => sum + ((item?.price || 0) * (item?.quantity || 0)), 0).toFixed(2)}</td>
+                    <td className="text-sm font-semibold text-right">
+                      ₹
+                      {(items || [])
+                        .reduce(
+                          (sum, item) =>
+                            sum + (item?.price || 0) * (item?.quantity || 0),
+                          0
+                        )
+                        .toFixed(2)}
+                    </td>
                   </tr>
                   <tr className="border-b">
                     <td className="text-sm py-2">Discount</td>
-                    <td className="text-sm font-semibold text-right">₹{(items || []).reduce((sum, item) => {
-                      if (!item) return sum;
-                      const subtotal = (item.price || 0) * (item.quantity || 0);
-                      return sum + (subtotal * (item.discountPercentage || 0) / 100);
-                    }, 0).toFixed(2)}</td>
+                    <td className="text-sm font-semibold text-right">
+                      ₹
+                      {(items || [])
+                        .reduce((sum, item) => {
+                          if (!item) return sum;
+                          const subtotal =
+                            (item.price || 0) * (item.quantity || 0);
+                          return (
+                            sum +
+                            (subtotal * (item.discountPercentage || 0)) / 100
+                          );
+                        }, 0)
+                        .toFixed(2)}
+                    </td>
                   </tr>
-                  {shouldShowTaxField() && getTaxBreakdown().map((tax) => (
-                    <tr key={tax.name} className="border-b">
-                      <td className="text-sm py-2">{tax.name}</td>
-                      <td className="text-sm font-semibold text-right">₹{tax.amount.toFixed(2)}</td>
-                    </tr>
-                  ))}
+                  {shouldShowTaxField() &&
+                    getTaxBreakdown().map((tax) => (
+                      <tr key={tax.name} className="border-b">
+                        <td className="text-sm py-2">{tax.name}</td>
+                        <td className="text-sm font-semibold text-right">
+                          ₹{tax.amount.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
                   <tr className="border-b">
                     <td className="text-sm py-2">Shipping</td>
-                    <td className="text-sm font-semibold text-right">₹{(shippingAmount || 0).toFixed(2)}</td>
+                    <td className="text-sm font-semibold text-right">
+                      ₹{(shippingAmount || 0).toFixed(2)}
+                    </td>
                   </tr>
                   <tr>
                     <td className="text-sm py-2">Total</td>
-                    <td className="text-sm font-semibold text-right">₹{(grossAmount || 0).toFixed(2)}</td>
+                    <td className="text-sm font-semibold text-right">
+                      ₹{(grossAmount || 0).toFixed(2)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <Button className="min-w-32" type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? <Spinner data-icon="inline-start" /> : "Create Invoice"}
+          <Button
+            className="min-w-32"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              "Create Invoice"
+            )}
           </Button>
         </form>
       </CardContent>

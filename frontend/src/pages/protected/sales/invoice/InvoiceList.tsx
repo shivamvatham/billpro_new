@@ -52,7 +52,7 @@ export default function InvoiceList() {
   const fetchInvoices = async () => {
     try {
       const response = await axios.get("/invoices");
-      setInvoices(response.data.data.invoices);
+      setInvoices(response.data.invoices);
     } catch (error) {
       console.log("Error fetching invoices:", error);
     }

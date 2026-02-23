@@ -39,7 +39,7 @@ const invoiceItemSchema = new mongoose.Schema({
         amount: { type: Number, default: 0, min: 0 },
         percentage: { type: Number, default: 0, min: 0 }
     },
-    priceWithTax: {
+    finalPrice: {
         type: Number,
         default: 0,
         min: 0

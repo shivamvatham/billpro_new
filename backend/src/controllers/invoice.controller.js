@@ -60,7 +60,7 @@ const invoiceSchema = Joi.object({
                 amount: Joi.number().min(0).default(0),
                 percentage: Joi.number().min(0).default(0)
             }).default({ amount: 0, percentage: 0 }),
-            priceWithTax: Joi.number().min(0).default(0)
+            finalPrice: Joi.number().min(0).default(0)
         })
     ).min(1).required().messages({
         'array.min': 'Invoice must have at least one item',
@@ -110,7 +110,7 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
         return next(new ApiError(404, 'Same product added more than 1 time'));
     }
 
-    const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
+    const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer);
     console.log(calculatedTotal)
     const expectedGrossAmount = Math.round(calculatedTotal + (value.shippingAmount || 0));
 
@@ -257,7 +257,7 @@ exports.updateInvoice = catchAsync(async (req, res, next) => {
         return next(new ApiError(404, 'One or more products not found'));
     }
 
-    const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer, companyDetails);
+    const calculatedTotal = calculateInvoiceTotal(value.items, products, salesSeries, taxConfig, customer);
     const expectedGrossAmount = calculatedTotal + (value.shippingAmount || 0);
 
     if (Math.abs(expectedGrossAmount - value.grossAmount) > 1) {

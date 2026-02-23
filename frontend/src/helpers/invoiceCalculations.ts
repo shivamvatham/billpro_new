@@ -18,6 +18,7 @@ interface Product {
 
 interface TaxConfig {
   taxType: string;
+  taxNumber?: string;
   tax1?: { taxRate?: number; taxName?: string };
   tax2?: { taxRate?: number; taxName?: string };
   tax3?: { taxRate?: number; taxName?: string };
@@ -57,10 +58,10 @@ export const isSameState = (customerGst?: string, companyGst?: string) => {
   return customerGst && companyGst && customerGst.substring(0, 2) === companyGst.substring(0, 2);
 };
 
-export const calculateGSTRate = (product: Product, taxConfig: TaxConfig, customerGst?: string, companyGst?: string) => {
+export const calculateGSTRate = (product: Product, taxConfig: TaxConfig, customerGst?: string) => {
   if (!taxConfig || taxConfig.taxType !== 'GST') return 0;
   
-  if (isSameState(customerGst, companyGst) || !customerGst) {
+  if (isSameState(customerGst, taxConfig.taxNumber) || !customerGst) {
     return (product.productTax?.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0) + 
            (product.productTax?.tax3Rate ?? taxConfig.tax3?.taxRate ?? 0);
   } else {
@@ -72,12 +73,11 @@ export const calculateTaxBreakdown = (
   items: InvoiceItem[], 
   products: Product[], 
   taxConfig: TaxConfig, 
-  customerGst?: string, 
-  companyGst?: string
+  customerGst?: string
 ) => {
   if (!taxConfig) return [];
   
-  const sameState = isSameState(customerGst, companyGst) || !customerGst;
+  const sameState = isSameState(customerGst, taxConfig.taxNumber) || !customerGst;
   const taxes: Record<string, number> = {};
   
   items.forEach((item) => {
@@ -112,9 +112,9 @@ export const calculateItemTaxDetails = (
   product: Product | undefined,
   taxConfig: TaxConfig | undefined,
   customerGst?: string,
-  companyGst?: string,
   isTaxable: boolean = true
 ) => {
+  console.log(taxConfig)
   const subtotal = (item.price || 0) * (item.quantity || 0);
   const discountAmount = subtotal * (item.discountPercentage || 0) / 100;
   const afterDiscount = subtotal - discountAmount;
@@ -124,7 +124,7 @@ export const calculateItemTaxDetails = (
   let tax3: TaxDetail = { amount: 0, percentage: 0 };
   
   if (isTaxable && product && taxConfig) {
-    const sameState = isSameState(customerGst, companyGst) || !customerGst;
+    const sameState = isSameState(customerGst, taxConfig.taxNumber) || !customerGst;
     
     if (sameState) {
       const tax2Rate = product.productTax?.tax2Rate ?? taxConfig.tax2?.taxRate ?? 0;
@@ -137,13 +137,13 @@ export const calculateItemTaxDetails = (
     }
   }
   
-  const priceWithTax = afterDiscount + tax1.amount + tax2.amount + tax3.amount;
+  const finalPrice = afterDiscount + tax1.amount + tax2.amount + tax3.amount;
   
   return {
     discountAmount,
     tax1,
     tax2,
     tax3,
-    priceWithTax
+    finalPrice
   };
 };
