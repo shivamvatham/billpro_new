@@ -4,19 +4,44 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 
 const taxConfigSchema = Joi.object({
-  taxType: Joi.string().valid("None", "Service", "GST").required().messages({
+  taxType: Joi.string().valid("None", "GST").required().messages({
     "string.empty": "Tax type is required",
-    "any.required": "Tax type must be GST, Service, or None",
-    "any.only": "Tax type must be GST, Service, or None",
+    // "any.required": "Tax type must be GST, Service, or None",
+    "any.required": "Tax type must be GST or None",
+    "any.only": "Tax type must be GST or None",
   }),
+  // taxNumber: Joi.string().when("taxType", {
+  //   is: Joi.valid("GST", "Service"),
+  //   then: Joi.required().messages({
+  //     "string.empty": "Tax number is required",
+  //     "any.required": "Tax number is required",
+  //   }),
+  //   otherwise: Joi.optional().allow(null, ""),
+  // }),
   taxNumber: Joi.string().when("taxType", {
-    is: Joi.valid("GST", "Service"),
+    is: Joi.valid("GST"),
     then: Joi.required().messages({
       "string.empty": "Tax number is required",
       "any.required": "Tax number is required",
     }),
     otherwise: Joi.optional().allow(null, ""),
   }),
+  // tax1: Joi.object({
+  //   taxName: Joi.string().required().messages({
+  //     "string.empty": "Tax name is required",
+  //     "any.required": "Tax name is required",
+  //   }),
+  //   taxRate: Joi.number().min(1).max(100).required().messages({
+  //     "number.base": "Tax rate must be a number",
+  //     "number.min": "Tax rate must be at least 1",
+  //     "number.max": "Tax rate cannot exceed 100",
+  //     "any.required": "Tax rate is required",
+  //   }),
+  // }).when("taxType", {
+  //   is: Joi.valid("GST", "Service"),
+  //   then: Joi.required(),
+  //   otherwise: Joi.optional().allow(null),
+  // }),
   tax1: Joi.object({
     taxName: Joi.string().required().messages({
       "string.empty": "Tax name is required",
@@ -29,7 +54,7 @@ const taxConfigSchema = Joi.object({
       "any.required": "Tax rate is required",
     }),
   }).when("taxType", {
-    is: Joi.valid("GST", "Service"),
+    is: Joi.valid("GST"),
     then: Joi.required(),
     otherwise: Joi.optional().allow(null),
   }),

@@ -13,11 +13,12 @@ const calculateTaxRate = (product, taxConfig, customer, companyDetails, isTaxabl
         } else {
             return product?.productTax?.tax1Rate || taxConfig.tax1?.taxRate || 0;
         }
-    } else if (taxConfig?.taxType === 'Service') {
-        return (product?.productTax?.tax1Rate || taxConfig.tax1?.taxRate || 0) + 
-               (product?.productTax?.tax2Rate || taxConfig.tax2?.taxRate || 0) + 
-               (product?.productTax?.tax3Rate || taxConfig.tax3?.taxRate || 0);
     }
+    // } else if (taxConfig?.taxType === 'Service') {
+    //     return (product?.productTax?.tax1Rate || taxConfig.tax1?.taxRate || 0) + 
+    //            (product?.productTax?.tax2Rate || taxConfig.tax2?.taxRate || 0) + 
+    //            (product?.productTax?.tax3Rate || taxConfig.tax3?.taxRate || 0);
+    // }
     
     return 0;
 };

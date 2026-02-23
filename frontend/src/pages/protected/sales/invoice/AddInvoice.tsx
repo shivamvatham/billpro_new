@@ -110,12 +110,6 @@ export default function AddInvoice() {
       } else {
         return product.tax1Rate || 0;
       }
-    } else if (taxConfig.taxType === 'Service') {
-      let total = 0;
-      if (taxConfig.tax1) total += product.tax1Rate || taxConfig.tax1.taxRate || 0;
-      if (taxConfig.tax2) total += product.tax2Rate || taxConfig.tax2.taxRate || 0;
-      if (taxConfig.tax3) total += product.tax3Rate || taxConfig.tax3.taxRate || 0;
-      return total;
     }
     
     return 0;
@@ -125,6 +119,35 @@ export default function AddInvoice() {
     if (!baseData || !salesSeriesId) return false;
     const series = baseData.invoiceSeries.find(s => s._id === salesSeriesId);
     return series?.invoiceTaxable;
+  };
+
+  const getTaxBreakdown = () => {
+    if (!shouldShowTaxField() || !baseData) return { cgst: 0, sgst: 0, igst: 0 };
+    
+    const customer = baseData.customers.find(c => c._id === customerId);
+    const isSameState = customer?.gstNumber && 
+      customer.gstNumber.substring(0, 2) === (baseData.customers[0]?.gstNumber?.substring(0, 2) || '');
+    
+    let cgst = 0, sgst = 0, igst = 0;
+    
+    (items || []).forEach((item, index) => {
+      const product = baseData.products.find(p => p._id === item.itemId);
+      if (!product) return;
+      
+      const subtotal = (item.price || 0) * (item.quantity || 0);
+      const afterDiscount = subtotal - (subtotal * (item.discountPercentage || 0) / 100);
+      
+      if (isSameState) {
+        const tax2 = product.tax2Rate || 0;
+        const tax3 = product.tax3Rate || 0;
+        cgst += (afterDiscount * tax2) / 100;
+        sgst += (afterDiscount * tax3) / 100;
+      } else {
+        igst += (afterDiscount * (product.tax1Rate || 0)) / 100;
+      }
+    });
+    
+    return { cgst, sgst, igst };
   };
 
   const onSubmit = async (data: Invoice) => {
@@ -502,9 +525,34 @@ export default function AddInvoice() {
                       return sum + (subtotal * (item.discountPercentage || 0) / 100);
                     }, 0).toFixed(2)}</td>
                   </tr>
+                  {shouldShowTaxField() && (() => {
+                    const { cgst, sgst, igst } = getTaxBreakdown();
+                    return (
+                      <>
+                        {cgst > 0 && (
+                          <tr className="border-b">
+                            <td className="text-sm py-2">CGST</td>
+                            <td className="text-sm font-semibold text-right">₹{cgst.toFixed(2)}</td>
+                          </tr>
+                        )}
+                        {sgst > 0 && (
+                          <tr className="border-b">
+                            <td className="text-sm py-2">SGST</td>
+                            <td className="text-sm font-semibold text-right">₹{sgst.toFixed(2)}</td>
+                          </tr>
+                        )}
+                        {igst > 0 && (
+                          <tr className="border-b">
+                            <td className="text-sm py-2">IGST</td>
+                            <td className="text-sm font-semibold text-right">₹{igst.toFixed(2)}</td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })()}
                   <tr className="border-b">
                     <td className="text-sm py-2">Shipping</td>
-                    <td className="text-sm font-semibold text-right">{(shippingAmount || 0).toFixed(2)}</td>
+                    <td className="text-sm font-semibold text-right">₹{(shippingAmount || 0).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td className="text-sm py-2">Total</td>

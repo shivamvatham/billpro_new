@@ -243,7 +243,7 @@ export default function General() {
                     <SelectContent position="popper">
                       <SelectGroup>
                         <SelectItem value="None">None</SelectItem>
-                        <SelectItem value="Service">Service</SelectItem>
+                        {/* <SelectItem value="Service">Service</SelectItem> */}
                         <SelectItem value="GST">GST</SelectItem>
                       </SelectGroup>
                     </SelectContent>
