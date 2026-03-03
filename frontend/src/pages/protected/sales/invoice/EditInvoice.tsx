@@ -245,8 +245,10 @@ export default function EditInvoice() {
 
     try {
       const taxConfig = baseData?.taxConfigs[0];
+      const series = baseData?.invoiceSeries.find(s => s._id === data.salesSeriesId);
       const payload = {
         ...data,
+        invoicePrefix: series?.invoiceSeriesPrefix || "",
         items: data.items.map((item) => {
           const product = baseData?.products.find((p) => p._id === item.itemId);
           const customer = baseData?.customers.find(

@@ -58,6 +58,13 @@ export const protectedRoute: AppRoute[] = [
         element: lazy(() => import("@/pages/protected/sales/invoice/EditInvoice")),
       },
       {
+        title: "Invoice Print Template 1",
+        name: "sales.invoice.print.temp1",
+        path: "/sales/invoice/invoiceTemp1/:id",
+        hidden: true,
+        element: lazy(() => import("@/pages/protected/sales/invoice/InvoiceTemp1")),
+      },
+      {
         title: "Series List",
         name: "sales.series.list",
         icon: "List",

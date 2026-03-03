@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,6 +29,11 @@ export default function AddReceipt() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  
+  const invoiceId = searchParams.get('invoiceId');
+  const customerId = searchParams.get('customerId');
+  const amount = searchParams.get('amount');
 
   const form = useForm({
     resolver: zodResolver(receiptSchema),
@@ -39,6 +44,7 @@ export default function AddReceipt() {
       receiptAmount: 0,
       receiptDate: "",
       receiptDescription: "",
+      invoiceId: "",
     },
   });
 
@@ -54,11 +60,12 @@ export default function AddReceipt() {
         
         const today = new Date().toISOString().split('T')[0];
         form.reset({
-          customer: "",
+          customer: customerId || "",
           account: accountsRes.data.accounts[0]?._id || "",
-          receiptAmount: 0,
+          receiptAmount: amount ? Number(amount) : 0,
           receiptDate: today,
           receiptDescription: "",
+          invoiceId: invoiceId || "",
         });
       } catch (error) {
         console.log("error", error);
@@ -70,7 +77,7 @@ export default function AddReceipt() {
   const onSubmit = async (data: Receipt) => {
     try {
       await axios.post("/receipts", data);
-      navigate("/receipts/list");
+      navigate(invoiceId ? "/sales/invoice/list" : "/receipts/list");
       form.reset();
     } catch (error) {
       console.log("error", error);
@@ -91,7 +98,7 @@ export default function AddReceipt() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Customer Name</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select key={field.value} value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger aria-invalid={fieldState.invalid}>
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>

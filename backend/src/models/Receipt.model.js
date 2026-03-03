@@ -6,6 +6,11 @@ const receiptSchema = new mongoose.Schema({
         ref: 'Customer',
         required: true,
     },
+    invoiceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Invoice',
+        default: null
+    },
     account: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Account',

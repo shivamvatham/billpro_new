@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Building2, Settings2, Sliders } from "lucide-react"
 import { useNavigate, useLocation, Outlet } from "react-router"
 import { useEffect } from "react"

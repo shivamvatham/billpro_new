@@ -17,7 +17,7 @@ const columns: ColumnDef<Customer>[] = [
   {
     accessorKey: "openingBalance",
     header: "Balance",
-    cell: ({ row }) => row.original.openingBalance || "---",
+    cell: ({ row }) => row.original.openingBalance || "0",
   },
   {
     accessorKey: "contactNumber",

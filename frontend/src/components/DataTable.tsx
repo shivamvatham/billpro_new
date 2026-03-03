@@ -11,10 +11,17 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronsLeft, ChevronsRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -54,10 +61,19 @@ export function DataTable<TData, TValue>({
         if (accessorKey && !col.header) {
           return {
             ...col,
-            header: ({ column }: { column: { toggleSorting: (desc: boolean) => void; getIsSorted: () => string | false } }) => (
+            header: ({
+              column,
+            }: {
+              column: {
+                toggleSorting: (desc: boolean) => void;
+                getIsSorted: () => string | false;
+              };
+            }) => (
               <Button
                 variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
               >
                 {String(accessorKey)}
                 <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -68,10 +84,19 @@ export function DataTable<TData, TValue>({
         if (accessorKey && typeof col.header === "string") {
           return {
             ...col,
-            header: ({ column }: { column: { toggleSorting: (desc: boolean) => void; getIsSorted: () => string | false } }) => (
+            header: ({
+              column,
+            }: {
+              column: {
+                toggleSorting: (desc: boolean) => void;
+                getIsSorted: () => string | false;
+              };
+            }) => (
               <Button
                 variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
               >
                 {col.header as string}
                 <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -90,7 +115,7 @@ export function DataTable<TData, TValue>({
           id: "actions",
           header: "Actions",
           cell: ({ row }) => (
-            <div className="flex gap-2">
+            <div className="flex">
               {actions.map((action, index) => (
                 <Button
                   key={index}
@@ -129,12 +154,14 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-w-0 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         {searchKey && (
           <Input
             placeholder={`Search ${searchKey}...`}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+            value={
+              (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+            }
             onChange={(event) =>
               table.getColumn(searchKey)?.setFilterValue(event.target.value)
             }
@@ -157,7 +184,9 @@ export function DataTable<TData, TValue>({
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
@@ -166,17 +195,23 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="w-full min-w-0 rounded-md border">
+        <Table className="min-w-max">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const isSticky = (header.column.columnDef.meta as { sticky?: boolean })?.sticky;
+                  const isSticky = (
+                    header.column.columnDef.meta as { sticky?: boolean }
+                  )?.sticky;
                   return (
-                    <TableHead 
+                    <TableHead
                       key={header.id}
-                      className={isSticky ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]" : ""}
+                      className={
+                        isSticky
+                          ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]"
+                          : ""
+                      }
                     >
                       {header.isPlaceholder
                         ? null
@@ -195,13 +230,22 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => {
-                    const isSticky = (cell.column.columnDef.meta as { sticky?: boolean })?.sticky;
+                    const isSticky = (
+                      cell.column.columnDef.meta as { sticky?: boolean }
+                    )?.sticky;
                     return (
-                      <TableCell 
+                      <TableCell
                         key={cell.id}
-                        className={isSticky ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]" : ""}
+                        className={
+                          isSticky
+                            ? "sticky right-0 bg-background shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.1)]"
+                            : "pl-3"
+                        }
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     );
                   })}
@@ -209,7 +253,10 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={table.getVisibleLeafColumns().length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -224,7 +271,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          <ChevronsLeft/>
         </Button>
         <Button
           variant="outline"
@@ -232,7 +279,7 @@ export function DataTable<TData, TValue>({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          <ChevronsRight/>
         </Button>
       </div>
     </div>

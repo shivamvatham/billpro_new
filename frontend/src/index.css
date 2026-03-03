@@ -134,3 +134,13 @@
   transform: translateY(-50%) !important;
 }
 
+@media print {
+  header, footer, nav, .sidebar {
+    display: none !important;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}
+

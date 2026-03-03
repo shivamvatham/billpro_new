@@ -60,11 +60,9 @@ interface Product {
   productName: string;
   price: number;
   hsnCode?: string;
-  productTax?: {
-    tax1Rate?: number;
-    tax2Rate?: number;
-    tax3Rate?: number;
-  };
+  tax1Rate?: number;
+  tax2Rate?: number;
+  tax3Rate?: number;
 }
 
 interface TaxConfig {
@@ -160,7 +158,7 @@ export default function AddInvoice() {
     if (!baseData || !items) return;
 
     const customer = baseData.customers.find((c) => c._id === customerId);
-    form.setValue("shippingAddress", customer?.address || '');
+    form.setValue("shippingAddress", customer?.address || "");
     const itemsWithTax = items.map((item, index) => ({
       ...item,
       tax: shouldShowTaxField() ? item.tax || getCalculatedTax(index) : 0,
@@ -245,8 +243,10 @@ export default function AddInvoice() {
 
     try {
       const taxConfig = baseData?.taxConfigs[0];
+      const series = baseData?.invoiceSeries.find(s => s._id === data.salesSeriesId);
       const payload = {
         ...data,
+        invoicePrefix: series?.invoiceSeriesPrefix || "",
         items: data.items.map((item) => {
           const product = baseData?.products.find((p) => p._id === item.itemId);
           const customer = baseData?.customers.find(
@@ -750,7 +750,9 @@ export default function AddInvoice() {
                 <Input
                   id="roundOff"
                   type="text"
-                  value={(unroundedTotal - Math.round(unroundedTotal)).toFixed(2)}
+                  value={(unroundedTotal - Math.round(unroundedTotal)).toFixed(
+                    2
+                  )}
                   readOnly
                   className="bg-muted"
                 />
@@ -762,7 +764,6 @@ export default function AddInvoice() {
                   <tr className="border-b">
                     <td className="text-sm py-2">Subtotal</td>
                     <td className="text-sm font-semibold text-right">
-                      ₹
                       {(items || [])
                         .reduce(
                           (sum, item) =>
@@ -775,7 +776,6 @@ export default function AddInvoice() {
                   <tr className="border-b">
                     <td className="text-sm py-2">Discount</td>
                     <td className="text-sm font-semibold text-right">
-                      ₹
                       {(items || [])
                         .reduce((sum, item) => {
                           if (!item) return sum;
@@ -794,20 +794,20 @@ export default function AddInvoice() {
                       <tr key={tax.name} className="border-b">
                         <td className="text-sm py-2">{tax.name}</td>
                         <td className="text-sm font-semibold text-right">
-                          ₹{tax.amount.toFixed(2)}
+                          {tax.amount.toFixed(2)}
                         </td>
                       </tr>
                     ))}
                   <tr className="border-b">
                     <td className="text-sm py-2">Shipping</td>
                     <td className="text-sm font-semibold text-right">
-                      ₹{(shippingAmount || 0).toFixed(2)}
+                      {(shippingAmount || 0).toFixed(2)}
                     </td>
                   </tr>
                   <tr>
                     <td className="text-sm py-2">Total</td>
                     <td className="text-sm font-semibold text-right">
-                      ₹{(grossAmount || 0).toFixed(2)}
+                      {(grossAmount || 0).toFixed(2)}
                     </td>
                   </tr>
                 </tbody>
